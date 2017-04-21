@@ -1,0 +1,42 @@
+// ButtonStateChecker.h
+
+#ifndef _BUTTONSTATECHECKER_h
+#define _BUTTONSTATECHECKER_h
+
+#if defined(ARDUINO) && ARDUINO >= 100
+	#include "arduino.h"
+#else
+	#include "WProgram.h"
+#endif
+
+class ButtonStateChecker
+{
+private:
+	int buttonPin;
+
+	// Button timing variables
+	int debounce = 20;          // ms debounce period to prevent flickering when pressing or releasing the button
+	int DCgap = -1;            // max ms between clicks for a double click event
+	int holdTime = -1;        // ms hold period: how long to wait for press+hold event
+	int longHoldTime = -1;    // ms long hold period: how long to wait for press+hold event
+
+	// Button variables
+	bool buttonVal = HIGH;   // value read from button
+	bool buttonLast = HIGH;  // buffered value of the button's previous state
+	bool DCwaiting = false;  // whether we're waiting for a double click (down)
+	bool DConUp = false;     // whether to register a double click on next release, or whether to wait and click
+	bool singleOK = true;    // whether it's OK to do a single click
+	long downTime = -1;         // time the button was pressed down
+	long upTime = -1;           // time the button was released
+	bool ignoreUp = false;   // whether to ignore the button release because the click+hold was triggered
+	bool waitForUp = false;        // when held, whether to wait for the up event
+	bool holdEventPast = false;    // whether or not the hold event happened already
+	bool longHoldEventPast = false;// whether or not the long hold event happened already
+
+public:
+	ButtonStateChecker(int buttonPin);
+	int CheckButton();
+};
+
+#endif
+

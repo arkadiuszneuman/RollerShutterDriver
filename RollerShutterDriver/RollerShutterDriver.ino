@@ -1,29 +1,99 @@
-/*
-  Blink
-  Turns on an LED on for one second, then off for one second, repeatedly.
 
-  Most Arduinos have an on-board LED you can control. On the Uno and
-  Leonardo, it is attached to digital pin 13. If you're unsure what
-  pin the on-board LED is connected to on your Arduino model, check
-  the documentation at http://arduino.cc
+#include "ButtonStateChecker.h"
 
-  This example code is in the public domain.
+ButtonStateChecker buttonDown(2);
+ButtonStateChecker buttonUp(3);
 
-  modified 8 May 2014
-  by Scott Fitzgerald
- */
+const int upRelayPin = 5;
+const int downRelayPin = 6;
 
+bool isRollerMovingUp = false;
+bool isRollerMovingDown = false;
 
-// the setup function runs once when you press reset or power the board
-void setup() {
-  // initialize digital pin 13 as an output.
-  pinMode(13, OUTPUT);
+unsigned long rollerMillis = 0;
+
+void setup() 
+{
+	Serial.begin(9600);
+
+	pinMode(upRelayPin, OUTPUT);
+	pinMode(downRelayPin, OUTPUT);
+
+	digitalWrite(upRelayPin, HIGH);
+	digitalWrite(downRelayPin, HIGH);
+
+	MoveRelayUp();
 }
 
-// the loop function runs over and over again forever
-void loop() {
-  digitalWrite(13, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(1000);              // wait for a second
-  digitalWrite(13, LOW);    // turn the LED off by making the voltage LOW
-  delay(1000);              // wait for a second
+void loop()
+{
+	if (buttonUp.CheckButton() == 2)
+	{
+		Serial.write("Up button");
+		if (isRelayMoving())
+		{
+			StopMovingRelays();
+		}
+		else
+		{
+			MoveRelayUp();
+		}
+	}
+
+	if (buttonDown.CheckButton() == 2)
+	{
+		Serial.write("Down button");
+		if (isRelayMoving())
+		{
+			StopMovingRelays();
+		}
+		else
+		{
+			
+		}
+	}
+
+	if (isTimePassed())
+	{
+		StopMovingRelays();
+	}
 }
+
+bool isRelayMoving()
+{
+	return isRollerMovingUp || isRollerMovingDown;
+}
+
+bool isTimePassed() 
+{
+	if (isRelayMoving())
+	{
+		//TODO millis overflow
+		unsigned long passedTime = millis() - rollerMillis;
+
+		if (passedTime > 5000)
+		{
+			return true;
+		}
+
+	}
+
+	return false;
+}
+
+void MoveRelayUp() 
+{
+	digitalWrite(upRelayPin, LOW);
+	isRollerMovingUp = true;
+	isRollerMovingDown = false;
+	rollerMillis = millis();
+}
+
+void StopMovingRelays() 
+{
+	digitalWrite(upRelayPin, HIGH);
+	digitalWrite(downRelayPin, HIGH);
+	isRollerMovingUp = false;
+	isRollerMovingDown = false;
+}
+
