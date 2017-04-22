@@ -10,7 +10,9 @@ const int downRelayPin = 6;
 bool isRollerMovingUp = false;
 bool isRollerMovingDown = false;
 
+const int fullRollerMoveTime = 5000;
 unsigned long rollerMillis = 0;
+unsigned int rollerMillisFromTop = 0;
 
 void setup() 
 {
@@ -22,12 +24,13 @@ void setup()
 	digitalWrite(upRelayPin, HIGH);
 	digitalWrite(downRelayPin, HIGH);
 
-	MoveRelayUp();
+	StopMovingRelays();
 }
 
 void loop()
 {
-	if (buttonUp.CheckButton() == 2)
+	//TODO long hold or double click should move without watching time to end
+	if (buttonUp.CheckButton() == 2) 
 	{
 		Serial.write("Up button");
 		if (isRelayMoving())
@@ -49,13 +52,21 @@ void loop()
 		}
 		else
 		{
-			
+			MoveRelayDown();
 		}
 	}
 
 	if (isTimePassed())
 	{
+		bool movedUp = isRollerMovingUp;
+		bool movedDown = isRollerMovingDown;
+
 		StopMovingRelays();
+
+		if (movedUp)
+			rollerMillisFromTop = 0;
+		else if (movedDown)
+			rollerMillisFromTop = fullRollerMoveTime;
 	}
 }
 
@@ -71,11 +82,14 @@ bool isTimePassed()
 		//TODO millis overflow
 		unsigned long passedTime = millis() - rollerMillis;
 
-		if (passedTime > 5000)
+		if (isRollerMovingUp)
 		{
-			return true;
+			return passedTime > rollerMillisFromTop;
 		}
-
+		else if (isRollerMovingDown)
+		{
+			return passedTime > fullRollerMoveTime - rollerMillisFromTop;
+		}
 	}
 
 	return false;
@@ -83,16 +97,42 @@ bool isTimePassed()
 
 void MoveRelayUp() 
 {
-	digitalWrite(upRelayPin, LOW);
-	isRollerMovingUp = true;
-	isRollerMovingDown = false;
-	rollerMillis = millis();
+	if (rollerMillisFromTop > 0)
+	{
+		digitalWrite(upRelayPin, LOW);
+		isRollerMovingUp = true;
+		isRollerMovingDown = false;
+		rollerMillis = millis();
+	}
+}
+
+void MoveRelayDown()
+{
+	if (rollerMillisFromTop < fullRollerMoveTime)
+	{
+		digitalWrite(downRelayPin, LOW);
+		isRollerMovingUp = false;
+		isRollerMovingDown = true;
+		rollerMillis = millis();
+	}
 }
 
 void StopMovingRelays() 
 {
+	unsigned int passedTime = millis() - rollerMillis;
+
 	digitalWrite(upRelayPin, HIGH);
 	digitalWrite(downRelayPin, HIGH);
+
+	if (isRollerMovingUp)
+	{
+		rollerMillisFromTop -= passedTime;
+	}
+	else if (isRollerMovingDown)
+	{
+		rollerMillisFromTop += passedTime;
+	}
+
 	isRollerMovingUp = false;
 	isRollerMovingDown = false;
 }
