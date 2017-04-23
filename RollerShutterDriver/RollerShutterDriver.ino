@@ -2,10 +2,10 @@
 #define MY_RADIO_NRF24
 #define MY_REPEATER_FEATURE
 
-#include <MyConfig.h>
 #include <MySensors.h>
 #include "ButtonStateChecker.h"
 
+#define NODE_ID 1
 #define BUTTON_DOWN_PIN 2
 #define BUTTON_UP_PIN 3
 #define RELAY_DOWN_PIN 5
@@ -21,23 +21,39 @@ const int fullRollerMoveTime = 5000;
 unsigned long rollerMillis = 0;
 unsigned int rollerMillisFromTop = 0;
 
-void setup() 
+void setup()
 {
-	Serial.begin(9600);
+	Serial.begin(115200);
+	Serial.println("setup");
 
 	pinMode(RELAY_UP_PIN, OUTPUT);
 	pinMode(RELAY_DOWN_PIN, OUTPUT);
 
-	digitalWrite(RELAY_UP_PIN, HIGH);
-	digitalWrite(RELAY_DOWN_PIN, HIGH);
-
 	StopMovingRelays();
+}
+
+void presentation()
+{
+	Serial.println("presentation");
+	sendSketchInfo("WindowCover", "1.0");
+	present(NODE_ID, S_DIMMER);
+}
+
+void receive(const MyMessage &message)
+{
+	Serial.println(message.type);
+	Serial.println(message.bValue);
+
+	int requestedLevel = atoi(message.data);
+	Serial.println(message.data);
+	Serial.println(requestedLevel);
+
 }
 
 void loop()
 {
 	//TODO long hold or double click should move without watching time to end
-	if (buttonUp.CheckButton() == 2) 
+	if (buttonUp.CheckButton() == 2)
 	{
 		Serial.write("Up button");
 		if (isRelayMoving())
@@ -82,7 +98,7 @@ bool isRelayMoving()
 	return isRollerMovingUp || isRollerMovingDown;
 }
 
-bool isTimePassed() 
+bool isTimePassed()
 {
 	if (isRelayMoving())
 	{
@@ -102,7 +118,7 @@ bool isTimePassed()
 	return false;
 }
 
-void MoveRelayUp() 
+void MoveRelayUp()
 {
 	if (rollerMillisFromTop > 0)
 	{
@@ -124,7 +140,7 @@ void MoveRelayDown()
 	}
 }
 
-void StopMovingRelays() 
+void StopMovingRelays()
 {
 	unsigned int passedTime = millis() - rollerMillis;
 
