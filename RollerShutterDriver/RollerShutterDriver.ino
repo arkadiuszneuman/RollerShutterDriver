@@ -6,11 +6,13 @@
 #include <MySensors.h>
 #include "ButtonStateChecker.h"
 
-ButtonStateChecker buttonDown(2);
-ButtonStateChecker buttonUp(3);
+#define BUTTON_DOWN_PIN 2
+#define BUTTON_UP_PIN 3
+#define RELAY_DOWN_PIN 5
+#define RELAY_UP_PIN 6
 
-const int upRelayPin = 5;
-const int downRelayPin = 6;
+ButtonStateChecker buttonDown(BUTTON_DOWN_PIN);
+ButtonStateChecker buttonUp(BUTTON_UP_PIN);
 
 bool isRollerMovingUp = false;
 bool isRollerMovingDown = false;
@@ -23,11 +25,11 @@ void setup()
 {
 	Serial.begin(9600);
 
-	pinMode(upRelayPin, OUTPUT);
-	pinMode(downRelayPin, OUTPUT);
+	pinMode(RELAY_UP_PIN, OUTPUT);
+	pinMode(RELAY_DOWN_PIN, OUTPUT);
 
-	digitalWrite(upRelayPin, HIGH);
-	digitalWrite(downRelayPin, HIGH);
+	digitalWrite(RELAY_UP_PIN, HIGH);
+	digitalWrite(RELAY_DOWN_PIN, HIGH);
 
 	StopMovingRelays();
 }
@@ -104,7 +106,7 @@ void MoveRelayUp()
 {
 	if (rollerMillisFromTop > 0)
 	{
-		digitalWrite(upRelayPin, LOW);
+		digitalWrite(RELAY_UP_PIN, LOW);
 		isRollerMovingUp = true;
 		isRollerMovingDown = false;
 		rollerMillis = millis();
@@ -115,7 +117,7 @@ void MoveRelayDown()
 {
 	if (rollerMillisFromTop < fullRollerMoveTime)
 	{
-		digitalWrite(downRelayPin, LOW);
+		digitalWrite(RELAY_DOWN_PIN, LOW);
 		isRollerMovingUp = false;
 		isRollerMovingDown = true;
 		rollerMillis = millis();
@@ -126,8 +128,8 @@ void StopMovingRelays()
 {
 	unsigned int passedTime = millis() - rollerMillis;
 
-	digitalWrite(upRelayPin, HIGH);
-	digitalWrite(downRelayPin, HIGH);
+	digitalWrite(RELAY_UP_PIN, HIGH);
+	digitalWrite(RELAY_DOWN_PIN, HIGH);
 
 	if (isRollerMovingUp)
 	{
