@@ -1,4 +1,9 @@
+#define MY_DEBUG
+#define MY_RADIO_NRF24
+#define MY_REPEATER_FEATURE
 
+#include <MyConfig.h>
+#include <MySensors.h>
 #include "ButtonStateChecker.h"
 
 ButtonStateChecker buttonDown(2);
