@@ -41,13 +41,18 @@ void presentation()
 
 void receive(const MyMessage &message)
 {
-	Serial.println(message.type);
-	Serial.println(message.bValue);
+	if (message.type == V_LIGHT || message.type == V_DIMMER) {
 
-	int requestedLevel = atoi(message.data);
-	Serial.println(message.data);
-	Serial.println(requestedLevel);
+		int requestedLevel = atoi(message.data);
 
+		requestedLevel *= (message.type == V_LIGHT ? 100 : 1);
+
+		requestedLevel = min(requestedLevel, 100);
+		requestedLevel = max(requestedLevel, 0);
+
+		Serial.print("Changing level to ");
+		Serial.println(requestedLevel);
+	}
 }
 
 void loop()
