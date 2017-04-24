@@ -18,8 +18,10 @@ bool isRollerMovingUp = false;
 bool isRollerMovingDown = false;
 
 const int fullRollerMoveTime = 5000;
+
 unsigned long rollerMillis = 0;
 unsigned int rollerMillisFromTop = 0;
+unsigned int rollerFinalMillis = 0;
 
 void setup()
 {
@@ -52,6 +54,10 @@ void receive(const MyMessage &message)
 
 		Serial.print("Changing level to ");
 		Serial.println(requestedLevel);
+
+		int millisToSet = requestedLevel * 0.01 * fullRollerMoveTime;
+
+		MoveRoller(millisToSet);
 	}
 }
 
@@ -67,7 +73,7 @@ void loop()
 		}
 		else
 		{
-			MoveRelayUp();
+			MoveRoller(0);
 		}
 	}
 
@@ -80,20 +86,17 @@ void loop()
 		}
 		else
 		{
-			MoveRelayDown();
+			MoveRoller(fullRollerMoveTime);
 		}
 	}
 
 	if (isTimePassed())
 	{
-		bool movedUp = isRollerMovingUp;
-		bool movedDown = isRollerMovingDown;
-
 		StopMovingRelays();
 
-		if (movedUp)
-			rollerMillisFromTop = 0;
-		else if (movedDown)
+		if (rollerFinalMillis == 0)
+			rollerMillisFromTop = rollerFinalMillis;
+		else if (rollerFinalMillis == fullRollerMoveTime)
 			rollerMillisFromTop = fullRollerMoveTime;
 	}
 }
@@ -112,15 +115,28 @@ bool isTimePassed()
 
 		if (isRollerMovingUp)
 		{
-			return passedTime > rollerMillisFromTop;
+			return passedTime > rollerMillisFromTop - rollerFinalMillis;
 		}
 		else if (isRollerMovingDown)
 		{
-			return passedTime > fullRollerMoveTime - rollerMillisFromTop;
+			return passedTime > rollerFinalMillis - rollerMillisFromTop;
 		}
 	}
 
 	return false;
+}
+
+void MoveRoller(int millisToSet)
+{
+	rollerFinalMillis = max(min(millisToSet, fullRollerMoveTime), 0);
+	if (rollerFinalMillis > rollerMillisFromTop)
+	{
+		MoveRelayDown();
+	}
+	else
+	{
+		MoveRelayUp();
+	}
 }
 
 void MoveRelayUp()
