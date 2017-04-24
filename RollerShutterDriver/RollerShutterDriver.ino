@@ -5,19 +5,18 @@
 #include <MySensors.h>
 #include "ButtonStateChecker.h"
 
-#define NODE_ID 1
+#define FULL_ROLLER_MOVE_TIME 10000
 #define BUTTON_DOWN_PIN 2
 #define BUTTON_UP_PIN 3
 #define RELAY_DOWN_PIN 5
 #define RELAY_UP_PIN 6
+#define NODE_ID 1
 
 ButtonStateChecker buttonDown(BUTTON_DOWN_PIN);
 ButtonStateChecker buttonUp(BUTTON_UP_PIN);
 
 bool isRollerMovingUp = false;
 bool isRollerMovingDown = false;
-
-const int fullRollerMoveTime = 5000;
 
 unsigned long rollerMillis = 0;
 unsigned int rollerMillisFromTop = 0;
@@ -55,7 +54,7 @@ void receive(const MyMessage &message)
 		Serial.print("Changing level to ");
 		Serial.println(requestedLevel);
 
-		int millisToSet = requestedLevel * 0.01 * fullRollerMoveTime;
+		int millisToSet = requestedLevel * 0.01 * FULL_ROLLER_MOVE_TIME;
 
 		MoveRoller(millisToSet);
 	}
@@ -86,7 +85,7 @@ void loop()
 		}
 		else
 		{
-			MoveRoller(fullRollerMoveTime);
+			MoveRoller(FULL_ROLLER_MOVE_TIME);
 		}
 	}
 
@@ -96,8 +95,8 @@ void loop()
 
 		if (rollerFinalMillis == 0)
 			rollerMillisFromTop = rollerFinalMillis;
-		else if (rollerFinalMillis == fullRollerMoveTime)
-			rollerMillisFromTop = fullRollerMoveTime;
+		else if (rollerFinalMillis == FULL_ROLLER_MOVE_TIME)
+			rollerMillisFromTop = FULL_ROLLER_MOVE_TIME;
 	}
 }
 
@@ -128,7 +127,7 @@ bool isTimePassed()
 
 void MoveRoller(int millisToSet)
 {
-	rollerFinalMillis = max(min(millisToSet, fullRollerMoveTime), 0);
+	rollerFinalMillis = max(min(millisToSet, FULL_ROLLER_MOVE_TIME), 0);
 	if (rollerFinalMillis > rollerMillisFromTop)
 	{
 		MoveRelayDown();
@@ -152,7 +151,7 @@ void MoveRelayUp()
 
 void MoveRelayDown()
 {
-	if (rollerMillisFromTop < fullRollerMoveTime)
+	if (rollerMillisFromTop < FULL_ROLLER_MOVE_TIME)
 	{
 		digitalWrite(RELAY_DOWN_PIN, LOW);
 		isRollerMovingUp = false;
