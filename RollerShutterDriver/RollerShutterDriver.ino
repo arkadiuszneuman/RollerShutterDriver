@@ -19,8 +19,8 @@ bool isRollerMovingUp = false;
 bool isRollerMovingDown = false;
 
 unsigned long rollerMillis = 0;
-unsigned int rollerMillisFromTop = 0;
-unsigned int rollerFinalMillis = 0;
+int rollerMillisFromTop = 0;
+int rollerFinalMillis = 0;
 
 void setup()
 {
@@ -42,7 +42,9 @@ void presentation()
 
 void receive(const MyMessage &message)
 {
-	if (message.type == V_LIGHT || message.type == V_DIMMER) {
+	if (message.type == V_LIGHT || message.type == V_DIMMER) 
+	{
+		StopMovingRelays();
 
 		int requestedLevel = atoi(message.data);
 
@@ -92,11 +94,6 @@ void loop()
 	if (isTimePassed())
 	{
 		StopMovingRelays();
-
-		if (rollerFinalMillis == 0)
-			rollerMillisFromTop = rollerFinalMillis;
-		else if (rollerFinalMillis == FULL_ROLLER_MOVE_TIME)
-			rollerMillisFromTop = FULL_ROLLER_MOVE_TIME;
 	}
 }
 
@@ -128,6 +125,12 @@ bool isTimePassed()
 void MoveRoller(int millisToSet)
 {
 	rollerFinalMillis = max(min(millisToSet, FULL_ROLLER_MOVE_TIME), 0);
+	Serial.print("Millis to set ");
+	Serial.println(rollerFinalMillis);
+
+	Serial.print("Millis from top ");
+	Serial.println(rollerMillisFromTop);
+
 	if (rollerFinalMillis > rollerMillisFromTop)
 	{
 		MoveRelayDown();
@@ -167,6 +170,10 @@ void StopMovingRelays()
 	digitalWrite(RELAY_UP_PIN, HIGH);
 	digitalWrite(RELAY_DOWN_PIN, HIGH);
 
+	Serial.print("passedTime ");
+	Serial.println(passedTime);
+	Serial.print("isRollerMovingUp ");
+	Serial.println(isRollerMovingUp);
 	if (isRollerMovingUp)
 	{
 		rollerMillisFromTop -= passedTime;
@@ -175,6 +182,12 @@ void StopMovingRelays()
 	{
 		rollerMillisFromTop += passedTime;
 	}
+
+	Serial.print("before Setting rollerMillisFromTop ");
+	Serial.println(rollerMillisFromTop);
+	rollerMillisFromTop = max(min(rollerMillisFromTop, FULL_ROLLER_MOVE_TIME), 0);
+	Serial.print("Setting rollerMillisFromTop ");
+	Serial.println(rollerMillisFromTop);
 
 	isRollerMovingUp = false;
 	isRollerMovingDown = false;
