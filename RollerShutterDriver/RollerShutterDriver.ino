@@ -35,7 +35,7 @@ void setup()
 	pinMode(RELAY_UP_PIN, OUTPUT);
 	pinMode(RELAY_DOWN_PIN, OUTPUT);
 
-	StopMovingRelays();
+	StopMovingRoller();
 }
 
 void presentation()
@@ -49,7 +49,7 @@ void receive(const MyMessage &message)
 {
 	if (message.type == V_LIGHT || message.type == V_DIMMER)
 	{
-		StopMovingRelays();
+		StopMovingRoller();
 
 		int requestedLevel = atoi(message.data);
 
@@ -73,9 +73,9 @@ void loop()
 	int buttonUpState = buttonUp.CheckButton();
 	if (buttonUpState > 0)
 	{
-		if (isRelayMoving())
+		if (isRollerMoving())
 		{
-			StopMovingRelays();
+			StopMovingRoller();
 		}
 		else
 		{
@@ -99,9 +99,9 @@ void loop()
 	int buttonDownState = buttonDown.CheckButton();
 	if (buttonDownState > 0)
 	{
-		if (isRelayMoving())
+		if (isRollerMoving())
 		{
-			StopMovingRelays();
+			StopMovingRoller();
 		}
 		else
 		{
@@ -124,18 +124,18 @@ void loop()
 
 	if (isTimePassed())
 	{
-		StopMovingRelays();
+		StopMovingRoller();
 	}
 }
 
-bool isRelayMoving()
+bool isRollerMoving()
 {
 	return isRollerMovingUp || isRollerMovingDown;
 }
 
 bool isTimePassed()
 {
-	if (isRelayMoving())
+	if (isRollerMoving())
 	{
 		//TODO millis overflow
 		unsigned long passedTime = millis() - rollerMillis;
@@ -179,16 +179,16 @@ void MoveRoller(int millisToSet)
 
 		if (rollerFinalMillis > rollerMillisFromTop || (fullRollerMove && rollerFinalMillis == 100))
 		{
-			MoveRelayDown();
+			MoveRollerDown();
 		}
 		else
 		{
-			MoveRelayUp();
+			MoveRollerUp();
 		}
 	}
 }
 
-void MoveRelayUp()
+void MoveRollerUp()
 {
 	if (rollerMillisFromTop > 0 || fullRollerMove)
 	{
@@ -198,7 +198,7 @@ void MoveRelayUp()
 	}
 }
 
-void MoveRelayDown()
+void MoveRollerDown()
 {
 	if (rollerMillisFromTop < FULL_ROLLER_MOVE_TIME || fullRollerMove)
 	{
@@ -208,7 +208,7 @@ void MoveRelayDown()
 	}
 }
 
-void StopMovingRelays()
+void StopMovingRoller()
 {
 	unsigned int passedTime = millis() - rollerMillis;
 
