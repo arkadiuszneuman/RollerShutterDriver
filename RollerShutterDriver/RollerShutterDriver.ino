@@ -1,4 +1,4 @@
-#define MY_DEBUG
+//#define MY_DEBUG
 #define MY_RADIO_NRF24
 #define MY_REPEATER_FEATURE
 
@@ -70,9 +70,8 @@ void receive(const MyMessage &message)
 void loop()
 {
 	//TODO long hold or double click should move without watching time to end
-	if (buttonUp.CheckButton() == 2)
+	if (buttonUp.CheckButton() == CLICK)
 	{
-		Serial.write("Up button");
 		if (isRelayMoving())
 		{
 			StopMovingRelays();
@@ -84,9 +83,8 @@ void loop()
 		}
 	}
 
-	if (buttonDown.CheckButton() == 2)
+	if (buttonDown.CheckButton() == CLICK)
 	{
-		Serial.write("Down button");
 		if (isRelayMoving())
 		{
 			StopMovingRelays();

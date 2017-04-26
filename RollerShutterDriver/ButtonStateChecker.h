@@ -9,6 +9,12 @@
 	#include "WProgram.h"
 #endif
 
+#define NOTHING 0
+#define DOUBLE_CLICK 1
+#define CLICK 2
+#define LONG_HOLD 3
+#define VERY_LONG_HOLD 4
+
 class ButtonStateChecker
 {
 private:
@@ -17,11 +23,10 @@ private:
 	// Button timing variables
 	int debounce = 20;          // ms debounce period to prevent flickering when pressing or releasing the button
 	int DCgap = -1;            // max ms between clicks for a double click event
-	int holdTime = -1;        // ms hold period: how long to wait for press+hold event
+	int holdTime = 5000;        // ms hold period: how long to wait for press+hold event
 	int longHoldTime = -1;    // ms long hold period: how long to wait for press+hold event
 
 	// Button variables
-	bool buttonVal = HIGH;   // value read from button
 	bool buttonLast = HIGH;  // buffered value of the button's previous state
 	bool DCwaiting = false;  // whether we're waiting for a double click (down)
 	bool DConUp = false;     // whether to register a double click on next release, or whether to wait and click

@@ -14,10 +14,11 @@ ButtonStateChecker::ButtonStateChecker(int buttonPin)
 
 int ButtonStateChecker::CheckButton()
 {
-	int event = 0;
-	buttonVal = digitalRead(buttonPin);
+	int event = NOTHING;
+	int buttonVal = digitalRead(buttonPin);
+
 	// Button pressed down
-	if (buttonVal == LOW && buttonLast == HIGH && (millis() - upTime) > debounce)
+	if (buttonVal == HIGH && buttonLast == LOW && (millis() - upTime) > debounce)
 	{
 		downTime = millis();
 		ignoreUp = false;
@@ -28,17 +29,20 @@ int ButtonStateChecker::CheckButton()
 		if ((millis() - upTime) < DCgap && DConUp == false && DCwaiting == true)  DConUp = true;
 		else  DConUp = false;
 		DCwaiting = false;
+
+		Serial.println("Down");
 	}
 	// Button released
-	else if (buttonVal == HIGH && buttonLast == LOW && (millis() - downTime) > debounce)
+	else if (buttonVal == LOW && buttonLast == HIGH && (millis() - downTime) > debounce)
 	{
+		Serial.println("Up");
 		if (!ignoreUp)
 		{
 			upTime = millis();
 			if (DConUp == true) DCwaiting = true;
 			else
 			{
-				event = 2;
+				event = CLICK;
 				DConUp = false;
 				DCwaiting = false;
 				singleOK = false;
@@ -46,22 +50,23 @@ int ButtonStateChecker::CheckButton()
 		}
 	}
 	// Test for normal click event: DCgap expired
-	if (buttonVal == HIGH && (millis() - upTime) >= DCgap && DCwaiting == true && DConUp == false && singleOK == true && event != 2)
+	if (buttonVal == LOW && (millis() - upTime) >= DCgap && DCwaiting == true && DConUp == false && singleOK == true && event != 2)
 	{
-		event = 1;
+		event = DOUBLE_CLICK;
 		DCwaiting = false;
 	}
 	// Test for hold
-	if (buttonVal == LOW && (millis() - downTime) >= holdTime) {
+	if (buttonVal == HIGH && (millis() - downTime) >= holdTime) 
+	{
 		// Trigger "normal" hold
 		if (!holdEventPast)
 		{
-			event = 3;
+			event = LONG_HOLD;
 			waitForUp = true;
 			ignoreUp = true;
 			DConUp = false;
 			DCwaiting = false;
-			//downTime = millis();
+			downTime = millis();
 			holdEventPast = true;
 		}
 		// Trigger "long" hold
@@ -69,7 +74,7 @@ int ButtonStateChecker::CheckButton()
 		{
 			if (!longHoldEventPast)
 			{
-				event = 4;
+				event = VERY_LONG_HOLD;
 				longHoldEventPast = true;
 			}
 		}
