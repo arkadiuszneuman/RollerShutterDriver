@@ -5,12 +5,12 @@
 #include <MySensors.h>
 #include "ButtonStateChecker.h"
 
-#define FULL_ROLLER_MOVE_TIME 10000
+#define FULL_ROLLER_MOVE_TIME 5000
 #define BUTTON_DOWN_PIN 2
 #define BUTTON_UP_PIN 3
 #define RELAY_DOWN_PIN 5
 #define RELAY_UP_PIN 6
-#define NODE_ID 1
+#define NODE_ID 0
 
 ButtonStateChecker buttonDown(BUTTON_DOWN_PIN);
 ButtonStateChecker buttonUp(BUTTON_UP_PIN);
@@ -21,6 +21,10 @@ bool isRollerMovingDown = false;
 unsigned long rollerMillis = 0;
 int rollerMillisFromTop = 0;
 int rollerFinalMillis = 0;
+
+bool isMovedFromButton;
+
+MyMessage dimmerMessage(NODE_ID, V_DIMMER);
 
 void setup()
 {
@@ -42,7 +46,7 @@ void presentation()
 
 void receive(const MyMessage &message)
 {
-	if (message.type == V_LIGHT || message.type == V_DIMMER) 
+	if (message.type == V_LIGHT || message.type == V_DIMMER)
 	{
 		StopMovingRelays();
 
@@ -58,6 +62,7 @@ void receive(const MyMessage &message)
 
 		int millisToSet = requestedLevel * 0.01 * FULL_ROLLER_MOVE_TIME;
 
+		isMovedFromButton = false;
 		MoveRoller(millisToSet);
 	}
 }
@@ -74,6 +79,7 @@ void loop()
 		}
 		else
 		{
+			isMovedFromButton = true;
 			MoveRoller(0);
 		}
 	}
@@ -87,6 +93,7 @@ void loop()
 		}
 		else
 		{
+			isMovedFromButton = true;
 			MoveRoller(FULL_ROLLER_MOVE_TIME);
 		}
 	}
@@ -125,19 +132,22 @@ bool isTimePassed()
 void MoveRoller(int millisToSet)
 {
 	rollerFinalMillis = max(min(millisToSet, FULL_ROLLER_MOVE_TIME), 0);
-	Serial.print("Millis to set ");
-	Serial.println(rollerFinalMillis);
-
-	Serial.print("Millis from top ");
-	Serial.println(rollerMillisFromTop);
-
-	if (rollerFinalMillis > rollerMillisFromTop)
+	if (rollerFinalMillis != rollerMillisFromTop)
 	{
-		MoveRelayDown();
-	}
-	else
-	{
-		MoveRelayUp();
+		Serial.print("Millis to set ");
+		Serial.println(rollerFinalMillis);
+
+		Serial.print("Millis from top ");
+		Serial.println(rollerMillisFromTop);
+
+		if (rollerFinalMillis > rollerMillisFromTop)
+		{
+			MoveRelayDown();
+		}
+		else
+		{
+			MoveRelayUp();
+		}
 	}
 }
 
@@ -174,6 +184,7 @@ void StopMovingRelays()
 	Serial.println(passedTime);
 	Serial.print("isRollerMovingUp ");
 	Serial.println(isRollerMovingUp);
+
 	if (isRollerMovingUp)
 	{
 		rollerMillisFromTop -= passedTime;
@@ -185,11 +196,25 @@ void StopMovingRelays()
 
 	Serial.print("before Setting rollerMillisFromTop ");
 	Serial.println(rollerMillisFromTop);
-	rollerMillisFromTop = max(min(rollerMillisFromTop, FULL_ROLLER_MOVE_TIME), 0);
+	rollerMillisFromTop = max(min(rollerMillisFromTop, FULL_ROLLER_MOVE_TIME), 1);
 	Serial.print("Setting rollerMillisFromTop ");
 	Serial.println(rollerMillisFromTop);
 
 	isRollerMovingUp = false;
 	isRollerMovingDown = false;
+
+	int currentLevel = rollerMillisFromTop * 100 / FULL_ROLLER_MOVE_TIME * 1.0;
+
+	Serial.println(currentLevel);
+
+	SendMessage(currentLevel);
+}
+
+void SendMessage(int currentLevel)
+{
+	if (isMovedFromButton)
+	{
+		send(dimmerMessage.set(currentLevel));
+	}
 }
 
