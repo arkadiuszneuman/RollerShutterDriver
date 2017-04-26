@@ -27,7 +27,7 @@ private:
 	int longHoldTime = -1;    // ms long hold period: how long to wait for press+hold event
 
 	// Button variables
-	bool buttonLast = HIGH;  // buffered value of the button's previous state
+	bool buttonLast = LOW;  // buffered value of the button's previous state
 	bool DCwaiting = false;  // whether we're waiting for a double click (down)
 	bool DConUp = false;     // whether to register a double click on next release, or whether to wait and click
 	bool singleOK = true;    // whether it's OK to do a single click

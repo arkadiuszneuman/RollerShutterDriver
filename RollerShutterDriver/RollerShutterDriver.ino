@@ -23,6 +23,7 @@ int rollerMillisFromTop = 0;
 int rollerFinalMillis = 0;
 
 bool isMovedFromButton;
+bool fullRollerMove = false;
 
 MyMessage dimmerMessage(NODE_ID, V_DIMMER);
 
@@ -69,8 +70,8 @@ void receive(const MyMessage &message)
 
 void loop()
 {
-	//TODO long hold or double click should move without watching time to end
-	if (buttonUp.CheckButton() == CLICK)
+	int buttonUpState = buttonUp.CheckButton();
+	if (buttonUpState > 0)
 	{
 		if (isRelayMoving())
 		{
@@ -78,12 +79,25 @@ void loop()
 		}
 		else
 		{
+			if (buttonUpState == CLICK)
+			{
+				fullRollerMove = false;
+			}
+			else if (buttonUpState == LONG_HOLD)
+			{
+				fullRollerMove = true;
+			}
+
+			Serial.print("fullRollerMove ");
+			Serial.println(fullRollerMove);
+
 			isMovedFromButton = true;
 			MoveRoller(0);
 		}
 	}
 
-	if (buttonDown.CheckButton() == CLICK)
+	int buttonDownState = buttonDown.CheckButton();
+	if (buttonDownState > 0)
 	{
 		if (isRelayMoving())
 		{
@@ -91,6 +105,18 @@ void loop()
 		}
 		else
 		{
+			if (buttonDownState == CLICK)
+			{
+				fullRollerMove = false;
+			}
+			else if (buttonDownState == LONG_HOLD)
+			{
+				fullRollerMove = true;
+			}
+
+			Serial.print("fullRollerMove ");
+			Serial.println(fullRollerMove);
+
 			isMovedFromButton = true;
 			MoveRoller(FULL_ROLLER_MOVE_TIME);
 		}
@@ -114,6 +140,17 @@ bool isTimePassed()
 		//TODO millis overflow
 		unsigned long passedTime = millis() - rollerMillis;
 
+		Serial.print("is full roller move ");
+		Serial.println(fullRollerMove);
+
+		if (fullRollerMove)
+		{
+			Serial.print("is passed by full roller move ");
+			Serial.println(passedTime > FULL_ROLLER_MOVE_TIME);
+
+			return passedTime > FULL_ROLLER_MOVE_TIME;
+		}
+
 		if (isRollerMovingUp)
 		{
 			return passedTime > rollerMillisFromTop - rollerFinalMillis;
@@ -130,7 +167,7 @@ bool isTimePassed()
 void MoveRoller(int millisToSet)
 {
 	rollerFinalMillis = max(min(millisToSet, FULL_ROLLER_MOVE_TIME), 0);
-	if (rollerFinalMillis != rollerMillisFromTop)
+	if (rollerFinalMillis != rollerMillisFromTop || fullRollerMove)
 	{
 		Serial.print("Millis to set ");
 		Serial.println(rollerFinalMillis);
@@ -138,7 +175,9 @@ void MoveRoller(int millisToSet)
 		Serial.print("Millis from top ");
 		Serial.println(rollerMillisFromTop);
 
-		if (rollerFinalMillis > rollerMillisFromTop)
+		rollerMillis = millis();
+
+		if (rollerFinalMillis > rollerMillisFromTop || (fullRollerMove && rollerFinalMillis == 100))
 		{
 			MoveRelayDown();
 		}
@@ -151,23 +190,21 @@ void MoveRoller(int millisToSet)
 
 void MoveRelayUp()
 {
-	if (rollerMillisFromTop > 0)
+	if (rollerMillisFromTop > 0 || fullRollerMove)
 	{
 		digitalWrite(RELAY_UP_PIN, LOW);
 		isRollerMovingUp = true;
 		isRollerMovingDown = false;
-		rollerMillis = millis();
 	}
 }
 
 void MoveRelayDown()
 {
-	if (rollerMillisFromTop < FULL_ROLLER_MOVE_TIME)
+	if (rollerMillisFromTop < FULL_ROLLER_MOVE_TIME || fullRollerMove)
 	{
 		digitalWrite(RELAY_DOWN_PIN, LOW);
 		isRollerMovingUp = false;
 		isRollerMovingDown = true;
-		rollerMillis = millis();
 	}
 }
 
@@ -194,7 +231,7 @@ void StopMovingRelays()
 
 	Serial.print("before Setting rollerMillisFromTop ");
 	Serial.println(rollerMillisFromTop);
-	rollerMillisFromTop = max(min(rollerMillisFromTop, FULL_ROLLER_MOVE_TIME), 1);
+	rollerMillisFromTop = max(min(rollerMillisFromTop, FULL_ROLLER_MOVE_TIME), 0);
 	Serial.print("Setting rollerMillisFromTop ");
 	Serial.println(rollerMillisFromTop);
 
