@@ -5,7 +5,7 @@
 #include <MySensors.h>
 #include "ButtonStateChecker.h"
 
-#define FULL_ROLLER_MOVE_TIME 5000
+#define FULL_ROLLER_MOVE_TIME 45000
 #define BUTTON_DOWN_PIN 2
 #define BUTTON_UP_PIN 3
 #define RELAY_DOWN_PIN 5
@@ -19,8 +19,8 @@ bool isRollerMovingUp = false;
 bool isRollerMovingDown = false;
 
 unsigned long rollerMillis = 0;
-int rollerMillisFromTop = 0;
-int rollerFinalMillis = 0;
+unsigned long rollerMillisFromTop = 0;
+unsigned long rollerFinalMillis = 0;
 
 bool isMovedFromButton;
 bool fullRollerMove = false;
@@ -61,9 +61,13 @@ void receive(const MyMessage &message)
 		Serial.print("Changing level to ");
 		Serial.println(requestedLevel);
 
-		int millisToSet = requestedLevel * 0.01 * FULL_ROLLER_MOVE_TIME;
+		long millisToSet = requestedLevel * 0.01 * FULL_ROLLER_MOVE_TIME;
+
+		Serial.print("millisToSet ");
+		Serial.println(millisToSet);
 
 		isMovedFromButton = false;
+		fullRollerMove = false;
 		MoveRoller(millisToSet);
 	}
 }
@@ -137,11 +141,7 @@ bool isTimePassed()
 {
 	if (isRollerMoving())
 	{
-		//TODO millis overflow
-		unsigned long passedTime = millis() - rollerMillis;
-
-		Serial.print("is full roller move ");
-		Serial.println(fullRollerMove);
+		unsigned long passedTime = SubstractWithoutOverflow(millis(), rollerMillis);
 
 		if (fullRollerMove)
 		{
@@ -153,20 +153,21 @@ bool isTimePassed()
 
 		if (isRollerMovingUp)
 		{
-			return passedTime > rollerMillisFromTop - rollerFinalMillis;
+			return passedTime > SubstractWithoutOverflow(rollerMillisFromTop, rollerFinalMillis);
 		}
 		else if (isRollerMovingDown)
 		{
-			return passedTime > rollerFinalMillis - rollerMillisFromTop;
+			return passedTime > SubstractWithoutOverflow(rollerFinalMillis, rollerMillisFromTop);
 		}
 	}
 
 	return false;
 }
 
-void MoveRoller(int millisToSet)
+void MoveRoller(long millisToSet)
 {
 	rollerFinalMillis = max(min(millisToSet, FULL_ROLLER_MOVE_TIME), 0);
+
 	if (rollerFinalMillis != rollerMillisFromTop || fullRollerMove)
 	{
 		Serial.print("Millis to set ");
@@ -210,7 +211,7 @@ void MoveRollerDown()
 
 void StopMovingRoller()
 {
-	unsigned int passedTime = millis() - rollerMillis;
+	unsigned long passedTime = SubstractWithoutOverflow(millis(), rollerMillis);
 
 	digitalWrite(RELAY_UP_PIN, HIGH);
 	digitalWrite(RELAY_DOWN_PIN, HIGH);
@@ -222,7 +223,7 @@ void StopMovingRoller()
 
 	if (isRollerMovingUp)
 	{
-		rollerMillisFromTop -= passedTime;
+		rollerMillisFromTop = SubstractWithoutOverflow(rollerMillisFromTop, passedTime);
 	}
 	else if (isRollerMovingDown)
 	{
@@ -243,6 +244,16 @@ void StopMovingRoller()
 	Serial.println(currentLevel);
 
 	SendMessage(currentLevel);
+}
+
+unsigned long SubstractWithoutOverflow(unsigned long firstNumber, unsigned long secondNumber)
+{
+	if (firstNumber < secondNumber)
+	{
+		return 0;
+	}
+
+	return firstNumber - secondNumber;
 }
 
 void SendMessage(int currentLevel)
