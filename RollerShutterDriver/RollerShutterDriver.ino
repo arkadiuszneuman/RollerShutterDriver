@@ -5,7 +5,7 @@
 #include <MySensors.h>
 #include "ButtonStateChecker.h"
 
-#define FULL_ROLLER_MOVE_TIME 45000
+#define FULL_ROLLER_MOVE_TIME 43000
 #define BUTTON_DOWN_PIN 2
 #define BUTTON_UP_PIN 3
 #define RELAY_DOWN_PIN 5
@@ -151,6 +151,19 @@ bool isTimePassed()
 			return passedTime > FULL_ROLLER_MOVE_TIME;
 		}
 
+		//max top or max bottom should keep relay for 5 seconds more
+		if (rollerFinalMillis == 0 || rollerFinalMillis == FULL_ROLLER_MOVE_TIME)
+		{
+			if (isRollerMovingUp)
+			{
+				return SubstractWithoutOverflow(passedTime, 5000) > SubstractWithoutOverflow(rollerMillisFromTop, rollerFinalMillis);
+			}
+			else if (isRollerMovingDown)
+			{
+				return SubstractWithoutOverflow(passedTime, 5000) > SubstractWithoutOverflow(rollerFinalMillis, rollerMillisFromTop);
+			}
+		}
+
 		if (isRollerMovingUp)
 		{
 			return passedTime > SubstractWithoutOverflow(rollerMillisFromTop, rollerFinalMillis);
@@ -178,7 +191,7 @@ void MoveRoller(long millisToSet)
 
 		rollerMillis = millis();
 
-		if (rollerFinalMillis > rollerMillisFromTop || (fullRollerMove && rollerFinalMillis == 100))
+		if (rollerFinalMillis > rollerMillisFromTop || (fullRollerMove && rollerFinalMillis == FULL_ROLLER_MOVE_TIME))
 		{
 			MoveRollerDown();
 		}
