@@ -1,19 +1,38 @@
-//#define MY_DEBUG
-#define MY_RADIO_NRF24
-#define MY_REPEATER_FEATURE
+//#include <ESP8266WebServer.h>
+//#include <WiFiUdp.h>
+//#include <WiFiServer.h>
+//#include <WiFiClientSecure.h>
+//#include <WiFiClient.h>
+//#include <ESP8266WiFiType.h>
+//#include <ESP8266WiFiSTA.h>
+//#include <ESP8266WiFiScan.h>
+//#include <ESP8266WiFiMulti.h>
+//#include <ESP8266WiFiGeneric.h>
+//#include <ESP8266WiFiAP.h>
+//#include <ESP8266WiFi.h>
+//#include <ESP8266mDNS.h>
+//#include <ArduinoOTA.h>
 
-#include <MySensors.h>
+#include "OtaDriver.h"
 #include "ButtonStateChecker.h"
+#include "WifiConnector.h"
+#include "HttpSite.h"
 
 #define FULL_ROLLER_MOVE_TIME 43000
 #define BUTTON_DOWN_PIN 2
 #define BUTTON_UP_PIN 3
 #define RELAY_DOWN_PIN 5
 #define RELAY_UP_PIN 6
-#define NODE_ID 0
+
+#undef max
+#define max(a,b) ((a)>(b)?(a):(b))
+#undef min
+#define min(a,b) ((a)>(b)?(b):(a))
 
 ButtonStateChecker buttonDown(BUTTON_DOWN_PIN);
 ButtonStateChecker buttonUp(BUTTON_UP_PIN);
+
+OtaDriver otaDriver;
 
 bool isRollerMovingUp = false;
 bool isRollerMovingDown = false;
@@ -25,56 +44,65 @@ unsigned long rollerFinalMillis = 0;
 bool isMovedFromButton;
 bool fullRollerMove = false;
 
-MyMessage dimmerMessage(NODE_ID, V_DIMMER);
+WifiConnector wifiConnector;
+HttpSite httpSite;
 
 void setup()
 {
-	Serial.begin(115200);
-	Serial.println("setup");
+	Serial.begin(9600);
+	wifiConnector.ConnectToWifi();
+	httpSite.Init();
+
+	/*otaDriver.Init();
 
 	pinMode(RELAY_UP_PIN, OUTPUT);
 	pinMode(RELAY_DOWN_PIN, OUTPUT);
 
-	StopMovingRoller();
+	StopMovingRoller();*/
+
+	
+
+	// Wait for connection
+	
+
+
+	
 }
 
-void presentation()
-{
-	Serial.println("presentation");
-	sendSketchInfo("WindowCover", "1.0");
-	present(NODE_ID, S_DIMMER);
-}
-
-void receive(const MyMessage &message)
-{
-	if (message.type == V_LIGHT || message.type == V_DIMMER)
-	{
-		StopMovingRoller();
-
-		int requestedLevel = atoi(message.data);
-
-		requestedLevel *= (message.type == V_LIGHT ? 100 : 1);
-
-		requestedLevel = min(requestedLevel, 100);
-		requestedLevel = max(requestedLevel, 0);
-
-		Serial.print("Changing level to ");
-		Serial.println(requestedLevel);
-
-		long millisToSet = requestedLevel * 0.01 * FULL_ROLLER_MOVE_TIME;
-
-		Serial.print("millisToSet ");
-		Serial.println(millisToSet);
-
-		isMovedFromButton = false;
-		fullRollerMove = false;
-		MoveRoller(millisToSet);
-	}
-}
+//void receive(const MyMessage &message)
+//{
+//	if (message.type == V_LIGHT || message.type == V_DIMMER)
+//	{
+//		StopMovingRoller();
+//
+//		int requestedLevel = atoi(message.data);
+//
+//		requestedLevel *= (message.type == V_LIGHT ? 100 : 1);
+//
+//		requestedLevel = min(requestedLevel, 100);
+//		requestedLevel = max(requestedLevel, 0);
+//
+//		Serial.print("Changing level to ");
+//		Serial.println(requestedLevel);
+//
+//		long millisToSet = requestedLevel * 0.01 * FULL_ROLLER_MOVE_TIME;
+//
+//		Serial.print("millisToSet ");
+//		Serial.println(millisToSet);
+//
+//		isMovedFromButton = false;
+//		fullRollerMove = false;
+//		MoveRoller(millisToSet);
+//	}
+//}
 
 void loop()
 {
-	int buttonUpState = buttonUp.CheckButton();
+	httpSite.Update();
+
+	//otaDriver.Update();
+
+	/*int buttonUpState = buttonUp.CheckButton();
 	if (buttonUpState > 0)
 	{
 		if (isRollerMoving())
@@ -129,7 +157,7 @@ void loop()
 	if (isTimePassed())
 	{
 		StopMovingRoller();
-	}
+	}*/
 }
 
 bool isRollerMoving()
@@ -273,7 +301,7 @@ void SendMessage(int currentLevel)
 {
 	if (isMovedFromButton)
 	{
-		send(dimmerMessage.set(currentLevel));
+		//send(dimmerMessage.set(currentLevel));
 	}
 }
 
