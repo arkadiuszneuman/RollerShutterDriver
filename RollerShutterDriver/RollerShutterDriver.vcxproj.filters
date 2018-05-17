@@ -33,9 +33,6 @@
     <ClInclude Include="OtaDriver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WifiPass.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="WifiConnector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
