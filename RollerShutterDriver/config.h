@@ -18,6 +18,14 @@ const char page_config[] PROGMEM = R"=====(
     .hr {
         border: 1px solid gray;
     }
+    .save {
+        width: 100px;
+        height: 40px;
+        margin-top: 50px;
+    }
+    .reset-settings {
+        margin-top: 100px;
+    }
 </style>
 <body>
     <div class="menu">
@@ -28,8 +36,12 @@ const char page_config[] PROGMEM = R"=====(
     <form action="/save" method="POST">
         Wifi name: <input type="text" name="wifiname" value="{wifiname}"><br>
         Wifi pass: <input type="password" name="wifipassword" value="{wifipass}"><br>
-        <input type="submit" value="Save">
-      </form>
+        <input class="save" type="submit" value="Save">
+    </form>
+
+    <form class="reset-settings" action="/resetsettings" method="POST">
+        <input type="submit" value="Reset settings">
+    </form>
 </body>
 </html>
 )=====";

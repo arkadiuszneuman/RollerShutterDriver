@@ -2,13 +2,15 @@
 #include "index.h"
 #include "config.h"
 
-void HttpSite::Init()
+void HttpSite::Init(ConfigManager configManager)
 {
 	server = new ESP8266WebServer(80);
+	this->configManager = configManager;
 
 	server->on("/", std::bind(&HttpSite::Index, this));
 	server->on("/config", std::bind(&HttpSite::Config, this));
 	server->on("/save", HTTPMethod::HTTP_POST, std::bind(&HttpSite::ConfigPost, this));
+	server->on("/resetsettings", HTTPMethod::HTTP_POST, std::bind(&HttpSite::ResetSettings, this));
 
 	server->begin();
 	Serial.println("HTTP server started");
@@ -36,8 +38,8 @@ void HttpSite::Config()
 {
 	Serial.println("request for /config");
 	String html = page_config;
-	html.replace("{wifiname}", "some name");
-	html.replace("{wifipass}", "a");
+	html.replace("{wifiname}", configManager.WifiName);
+	html.replace("{wifipass}", configManager.WifiPass);
 	server->send(200, "text/html", html);
 }
 
@@ -47,8 +49,22 @@ void HttpSite::ConfigPost()
 	String wifiname = server->arg("wifiname");
 	String wifipass = server->arg("wifipassword");
 
-	Serial.println(wifiname);
-	Serial.println(wifipass);
+	configManager.WifiName = wifiname;
+	configManager.WifiPass = wifipass;
+
+	configManager.SaveConfig();
+
+	Config();
+}
+
+void HttpSite::ResetSettings()
+{
+	Serial.println("post to /resetsettings");
+
+	configManager.WifiName = "";
+	configManager.WifiPass = "";
+
+	configManager.SaveConfig();
 
 	Config();
 }

@@ -84,6 +84,7 @@
   <ItemGroup>
     <ClInclude Include="ButtonStateChecker.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="ConfigManager.h" />
     <ClInclude Include="HttpSite.h" />
     <ClInclude Include="index.h" />
     <ClInclude Include="OtaDriver.h" />
@@ -93,6 +94,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ButtonStateChecker.cpp" />
+    <ClCompile Include="ConfigManager.cpp" />
     <ClCompile Include="HttpSite.cpp" />
     <ClCompile Include="OtaDriver.cpp" />
     <ClCompile Include="WifiConnector.cpp" />

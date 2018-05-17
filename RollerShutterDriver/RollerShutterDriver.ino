@@ -1,18 +1,7 @@
-//#include <ESP8266WebServer.h>
-//#include <WiFiUdp.h>
-//#include <WiFiServer.h>
-//#include <WiFiClientSecure.h>
-//#include <WiFiClient.h>
-//#include <ESP8266WiFiType.h>
-//#include <ESP8266WiFiSTA.h>
-//#include <ESP8266WiFiScan.h>
-//#include <ESP8266WiFiMulti.h>
-//#include <ESP8266WiFiGeneric.h>
-//#include <ESP8266WiFiAP.h>
-//#include <ESP8266WiFi.h>
-//#include <ESP8266mDNS.h>
-//#include <ArduinoOTA.h>
+#include <ArduinoJson.hpp>
+#include <ArduinoJson.h>
 
+#include "ConfigManager.h"
 #include "OtaDriver.h"
 #include "ButtonStateChecker.h"
 #include "WifiConnector.h"
@@ -44,14 +33,19 @@ unsigned long rollerFinalMillis = 0;
 bool isMovedFromButton;
 bool fullRollerMove = false;
 
+ConfigManager configManager;
 WifiConnector wifiConnector;
 HttpSite httpSite;
 
 void setup()
 {
 	Serial.begin(9600);
+
+	configManager.Init();
+	configManager.LoadConfig();
+
 	wifiConnector.ConnectToWifi();
-	httpSite.Init();
+	httpSite.Init(configManager);
 	/*otaDriver.Init();
 
 	pinMode(RELAY_UP_PIN, OUTPUT);
