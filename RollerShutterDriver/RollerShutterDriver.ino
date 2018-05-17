@@ -8,10 +8,10 @@
 #include "HttpSite.h"
 
 #define FULL_ROLLER_MOVE_TIME 43000
-#define BUTTON_DOWN_PIN 2
-#define BUTTON_UP_PIN 3
-#define RELAY_DOWN_PIN 5
-#define RELAY_UP_PIN 6
+#define BUTTON_DOWN_PIN 5
+#define BUTTON_UP_PIN 4
+#define RELAY_DOWN_PIN 14
+#define RELAY_UP_PIN 12
 
 #undef max
 #define max(a,b) ((a)>(b)?(a):(b))
@@ -49,10 +49,10 @@ void setup()
 
 	otaDriver.Init();
 
-	//pinMode(RELAY_UP_PIN, OUTPUT);
-	//pinMode(RELAY_DOWN_PIN, OUTPUT);
+	pinMode(RELAY_UP_PIN, OUTPUT);
+	pinMode(RELAY_DOWN_PIN, OUTPUT);
 
-	//StopMovingRoller();
+	StopMovingRoller();
 }
 
 void receive(int requestedLevel)
@@ -80,7 +80,7 @@ void loop()
 	httpSite.Update();
 	otaDriver.Update();
 
-	/*int buttonUpState = buttonUp.CheckButton();
+	int buttonUpState = buttonUp.CheckButton();
 	if (buttonUpState > 0)
 	{
 		if (isRollerMoving())
@@ -135,7 +135,7 @@ void loop()
 	if (isTimePassed())
 	{
 		StopMovingRoller();
-	}*/
+	}
 }
 
 bool isRollerMoving()
