@@ -60,12 +60,9 @@ void WifiConnector::CreateSoftAP()
 {
 	Serial.println("Creating soft AP");
 
-	boolean result = WiFi.softAP("ESP_Same_Pass_As_SSID", "ESP_Same_Pass_As_SSID");
+	bool result = WiFi.softAP("ESP_Same_Pass_As_SSID", "ESP_Same_Pass_As_SSID");
 	if (result)
-	{
 		Serial.println("AP Ready");
-		Serial.println(WiFi.localIP());
-	}
 	else
 		Serial.println("Failed!");
 }

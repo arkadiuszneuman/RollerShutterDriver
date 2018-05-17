@@ -46,7 +46,10 @@ void setup()
 
 	wifiConnector.ConnectToWifi(configManager);
 	httpSite.Init(configManager);
-	/*otaDriver.Init();
+
+	otaDriver.Init();
+
+	/*
 
 	pinMode(RELAY_UP_PIN, OUTPUT);
 	pinMode(RELAY_DOWN_PIN, OUTPUT);
@@ -92,8 +95,7 @@ void setup()
 void loop()
 {
 	httpSite.Update();
-
-	//otaDriver.Update();
+	otaDriver.Update();
 
 	/*int buttonUpState = buttonUp.CheckButton();
 	if (buttonUpState > 0)

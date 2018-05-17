@@ -2,21 +2,10 @@
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
 #include <ArduinoOTA.h>
-#include "WifiPass.h";
 #include "OtaDriver.h"
 
 void OtaDriver::Init()
 {
-	Serial.begin(115200);
-	Serial.println("Booting");
-	WiFi.mode(WIFI_STA);
-	WiFi.begin(WIFISSID, WIFIPASSWORD);
-	while (WiFi.waitForConnectResult() != WL_CONNECTED) {
-		Serial.println("Connection Failed! Rebooting...");
-		delay(5000);
-		ESP.restart();
-	}
-
 	// Port defaults to 8266
 	// ArduinoOTA.setPort(8266);
 
