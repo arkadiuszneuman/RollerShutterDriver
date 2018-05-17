@@ -4,6 +4,7 @@
 #define _WIFICONNECTOR_h
 
 #include "WifiPass.h";
+#include "ConfigManager.h"
 
 #if defined(ARDUINO) && ARDUINO >= 100
 	#include "arduino.h"
@@ -15,8 +16,9 @@ class WifiConnector
 {
 private:
 	int maxConnectionSeconds = 10;
+	void CreateSoftAP();
 public:
-	void ConnectToWifi();
+	void ConnectToWifi(ConfigManager configManager);
 };
 
 #endif

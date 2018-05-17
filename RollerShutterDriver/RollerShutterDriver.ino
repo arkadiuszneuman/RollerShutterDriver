@@ -44,7 +44,7 @@ void setup()
 	configManager.Init();
 	configManager.LoadConfig();
 
-	wifiConnector.ConnectToWifi();
+	wifiConnector.ConnectToWifi(configManager);
 	httpSite.Init(configManager);
 	/*otaDriver.Init();
 
