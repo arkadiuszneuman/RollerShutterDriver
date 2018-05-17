@@ -52,7 +52,6 @@ void setup()
 	Serial.begin(9600);
 	wifiConnector.ConnectToWifi();
 	httpSite.Init();
-
 	/*otaDriver.Init();
 
 	pinMode(RELAY_UP_PIN, OUTPUT);

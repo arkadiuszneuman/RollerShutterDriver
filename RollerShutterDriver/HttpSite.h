@@ -15,10 +15,14 @@ class HttpSite
 {
 private:
 	ESP8266WebServer* server; //Server on port 80
-	void HandleRoot();
+	String status = "Idle";
+	void Index();
+	void Config();
+	void ConfigPost();
 public:
 	void Init();
 	void Update();
+	void SetStatus(String status);
 };
 
 #endif
