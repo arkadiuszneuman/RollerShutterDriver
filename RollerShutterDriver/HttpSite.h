@@ -18,14 +18,17 @@ private:
 	ESP8266WebServer* server; //Server on port 80
 	ConfigManager configManager;
 	String status = "Idle";
+	void(*receivedLevelFunc)(int);
 	void Index();
 	void Config();
 	void ConfigPost();
 	void ResetSettings();
+	void ChangeLevel();
 public:
-	void Init(ConfigManager configManager);
+	void Init(ConfigManager configManager, void(*receivedLevelFunc)(int));
 	void Update();
 	void SetStatus(String status);
+	void SendInformationAboutLevel(int level);
 };
 
 #endif

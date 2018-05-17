@@ -26,6 +26,9 @@ const char page_config[] PROGMEM = R"=====(
     .reset-settings {
         margin-top: 100px;
     }
+    .input {
+        width: 400px;
+    }
 </style>
 <body>
     <div class="menu">
@@ -34,8 +37,11 @@ const char page_config[] PROGMEM = R"=====(
     </div>
     <hr class="hr">
     <form action="/save" method="POST">
-        Wifi name: <input type="text" name="wifiname" value="{wifiname}"><br>
-        Wifi pass: <input type="password" name="wifipassword" value="{wifipass}"><br>
+        Wifi name: <input class="input" type="text" name="wifiname" value="{wifiname}"><br>
+        Wifi pass: <input class="input" type="password" name="wifipassword" value="{wifipass}"><br>
+        Info url <input class="input" type="text" name="infourl" value="{infourl}"><br>
+        Port: <input class="input" type="number" name="port" value="{port}"><br>
+        Uri (use {level} for level information): <input class="input" type="text" name="uri" value="{uri}"><br>
         <input class="save" type="submit" value="Save">
     </form>
 

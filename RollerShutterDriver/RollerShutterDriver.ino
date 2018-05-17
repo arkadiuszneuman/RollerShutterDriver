@@ -39,58 +39,41 @@ HttpSite httpSite;
 
 void setup()
 {
-	Serial.begin(9600);
+	Serial.begin(115200);
 
 	configManager.Init();
 	configManager.LoadConfig();
 
 	wifiConnector.ConnectToWifi(configManager);
-	httpSite.Init(configManager);
+	httpSite.Init(configManager, receive);
 
 	otaDriver.Init();
 
-	/*
+	//pinMode(RELAY_UP_PIN, OUTPUT);
+	//pinMode(RELAY_DOWN_PIN, OUTPUT);
 
-	pinMode(RELAY_UP_PIN, OUTPUT);
-	pinMode(RELAY_DOWN_PIN, OUTPUT);
-
-	StopMovingRoller();*/
-
-	
-
-	// Wait for connection
-	
-
-
-	
+	//StopMovingRoller();
 }
 
-//void receive(const MyMessage &message)
-//{
-//	if (message.type == V_LIGHT || message.type == V_DIMMER)
-//	{
-//		StopMovingRoller();
-//
-//		int requestedLevel = atoi(message.data);
-//
-//		requestedLevel *= (message.type == V_LIGHT ? 100 : 1);
-//
-//		requestedLevel = min(requestedLevel, 100);
-//		requestedLevel = max(requestedLevel, 0);
-//
-//		Serial.print("Changing level to ");
-//		Serial.println(requestedLevel);
-//
-//		long millisToSet = requestedLevel * 0.01 * FULL_ROLLER_MOVE_TIME;
-//
-//		Serial.print("millisToSet ");
-//		Serial.println(millisToSet);
-//
-//		isMovedFromButton = false;
-//		fullRollerMove = false;
-//		MoveRoller(millisToSet);
-//	}
-//}
+void receive(int requestedLevel)
+{
+	StopMovingRoller();
+
+	requestedLevel = min(requestedLevel, 100);
+	requestedLevel = max(requestedLevel, 0);
+
+	Serial.print("Changing level to ");
+	Serial.println(requestedLevel);
+
+	long millisToSet = requestedLevel * 0.01 * FULL_ROLLER_MOVE_TIME;
+
+	Serial.print("millisToSet ");
+	Serial.println(millisToSet);
+
+	isMovedFromButton = false;
+	fullRollerMove = false;
+	MoveRoller(millisToSet);
+}
 
 void loop()
 {
@@ -296,7 +279,7 @@ void SendMessage(int currentLevel)
 {
 	if (isMovedFromButton)
 	{
-		//send(dimmerMessage.set(currentLevel));
+		httpSite.SendInformationAboutLevel(currentLevel);
 	}
 }
 

@@ -18,6 +18,9 @@ bool ConfigManager::SaveConfig()
 
 	json["wifiname"] = WifiName;
 	json["wifipass"] = WifiPass;
+	json["infourl"] = InfoUrl;
+	json["port"] = Port;
+	json["uri"] = Uri;
 
 	File configFile = SPIFFS.open("/config.json", "w");
 	if (!configFile) 
@@ -82,13 +85,20 @@ bool ConfigManager::LoadConfig()
 
 	const char* wifiname = json["wifiname"];
 	const char* wifipass = json["wifipass"];
+	const char* infourl = json["infourl"];
+	const char* port = json["port"];
+	const char* uri = json["uri"];
 
 	Serial.println("Loaded config");
 	Serial.println(wifiname);
 	Serial.println(wifipass);
+	Serial.println(infourl);
 	
 	WifiName = wifiname;
 	WifiPass = wifipass;
+	InfoUrl = infourl;
+	Port = port;
+	Uri = uri;
 
 	configFile.close();
 

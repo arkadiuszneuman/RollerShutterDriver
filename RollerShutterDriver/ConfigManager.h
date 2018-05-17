@@ -17,6 +17,9 @@ public:
 
 	String WifiName = "";
 	String WifiPass = "";
+	String InfoUrl = "";
+	String Port = "";
+	String Uri = "";
 };
 
 #endif
