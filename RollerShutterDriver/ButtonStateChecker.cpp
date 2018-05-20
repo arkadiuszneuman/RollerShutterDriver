@@ -1,6 +1,6 @@
 #include "ButtonStateChecker.h"
 
-ButtonStateChecker::ButtonStateChecker(int buttonPin, Logger logger)
+ButtonStateChecker::ButtonStateChecker(int buttonPin, Logger &logger)
 {
 	this->logger = logger;
 	this->buttonPin = buttonPin;

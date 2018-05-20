@@ -46,6 +46,7 @@ void setup()
 	configManager.Init(logger);
 	configManager.LoadConfig();
 
+	wifiConnector.Init(logger);
 	wifiConnector.ConnectToWifi(configManager);
 	httpSite.Init(configManager, logger, receive);
 

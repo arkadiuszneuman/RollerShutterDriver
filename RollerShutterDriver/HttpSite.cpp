@@ -2,7 +2,7 @@
 #include "index.h"
 #include "config.h"
 
-void HttpSite::Init(ConfigManager configManager, Logger logger,
+void HttpSite::Init(ConfigManager &configManager, Logger &logger,
 	void (*receivedLevelFunc)(int))
 {
 	server = new ESP8266WebServer(80);
@@ -15,6 +15,7 @@ void HttpSite::Init(ConfigManager configManager, Logger logger,
 	server->on("/save", HTTPMethod::HTTP_POST, std::bind(&HttpSite::ConfigPost, this));
 	server->on("/resetsettings", HTTPMethod::HTTP_POST, std::bind(&HttpSite::ResetSettings, this));
 	server->on("/changelevel", std::bind(&HttpSite::ChangeLevel, this));
+	server->on("/logs", std::bind(&HttpSite::GetLogs, this));
 
 	server->begin();
 	logger.LogLine("HTTP server started");
@@ -137,4 +138,27 @@ void HttpSite::SendInformationAboutLevel(int level)
 		logger.LogLine();
 		logger.LogLine("closing connection");
 	}
+}
+
+void HttpSite::GetLogs()
+{
+	String* logs = logger.GetLogHistory();
+
+	String result = "{\"logs\": [";
+	bool isAnyLog = false;
+	for (int i = 0; i < logHistoryCount; i++)
+	{
+		if (logs[i] != "")
+		{
+			result += "\"" + logs[i] + "\",";
+			isAnyLog = true;
+		}
+	}
+
+	if (isAnyLog)
+		result = result.substring(0, result.length() - 1);
+
+	result += "]}";
+
+	server->send(200, "text/json", result);
 }

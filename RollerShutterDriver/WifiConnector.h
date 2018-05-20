@@ -18,8 +18,8 @@ private:
 	Logger logger;
 	void CreateSoftAP();
 public:
-	void ConnectToWifi(ConfigManager configManager);
-	void Init(Logger logger);
+	void ConnectToWifi(ConfigManager &configManager);
+	void Init(Logger &logger);
 };
 
 #endif

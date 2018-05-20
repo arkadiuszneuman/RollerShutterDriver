@@ -2,7 +2,7 @@
 #include <ArduinoJson.h>
 #include "FS.h"
 
-void ConfigManager::Init(Logger logger)
+void ConfigManager::Init(Logger &logger)
 {
 	this->logger = logger;
 

@@ -14,7 +14,7 @@ class OtaDriver
 private:
 	Logger logger;
 public:
-	void Init(Logger logger);
+	void Init(Logger &logger);
 	void Update();
 };
 

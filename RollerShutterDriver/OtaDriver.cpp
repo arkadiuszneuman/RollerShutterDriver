@@ -4,7 +4,7 @@
 #include <ArduinoOTA.h>
 #include "OtaDriver.h"
 
-void OtaDriver::Init(Logger logger)
+void OtaDriver::Init(Logger &logger)
 {
 	this->logger = logger;
 

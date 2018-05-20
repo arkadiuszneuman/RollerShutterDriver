@@ -25,8 +25,10 @@ private:
 	void ConfigPost();
 	void ResetSettings();
 	void ChangeLevel();
+	void GetLogs();
 public:
-	void Init(ConfigManager configManager, void(*receivedLevelFunc)(int));
+	void Init(ConfigManager &configManager, Logger &logger,
+		void(*receivedLevelFunc)(int));
 	void Update();
 	void SetStatus(String status);
 	void SendInformationAboutLevel(int level);

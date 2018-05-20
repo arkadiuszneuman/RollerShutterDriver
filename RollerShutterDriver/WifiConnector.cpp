@@ -1,12 +1,12 @@
 #include "WifiConnector.h"
 #include <ESP8266WiFi.h>
 
-void WifiConnector::Init(Logger logger)
+void WifiConnector::Init(Logger &logger)
 {
 	this->logger = logger;
 }
 
-void WifiConnector::ConnectToWifi(ConfigManager configManager)
+void WifiConnector::ConnectToWifi(ConfigManager &configManager)
 {
 	if (configManager.WifiName == "")
 	{
@@ -19,7 +19,7 @@ void WifiConnector::ConnectToWifi(ConfigManager configManager)
 
 	WiFi.begin(wifiname, wifipass); //Connect to your WiFi router
 
-	logger.LogLine("");
+	logger.LogLine();
 
 	int connectionSeconds = 0;
 	bool isConnected = false;

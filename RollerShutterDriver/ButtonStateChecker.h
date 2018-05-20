@@ -41,7 +41,7 @@ private:
 	bool longHoldEventPast = false;// whether or not the long hold event happened already
 	Logger logger;
 public:
-	ButtonStateChecker(int buttonPin, Logger logger);
+	ButtonStateChecker(int buttonPin, Logger &logger);
 	int CheckButton();
 };
 

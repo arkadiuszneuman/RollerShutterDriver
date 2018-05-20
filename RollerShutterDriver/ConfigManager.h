@@ -15,7 +15,7 @@ class ConfigManager {
 private:
 	Logger logger;
 public:
-	void Init(Logger logger);
+	void Init(Logger &logger);
 	bool SaveConfig();
 	bool LoadConfig();
 
