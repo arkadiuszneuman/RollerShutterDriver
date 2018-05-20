@@ -20,7 +20,8 @@ private:
 public:
 	void Init();
 	void Log(String text);
-	void LogLine(String text);
+	void LogLine(String text = "");
+	void LogLine(int text);
 	String* GetLogHistory();
 };
 

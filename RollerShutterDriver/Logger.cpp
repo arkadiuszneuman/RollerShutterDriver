@@ -13,6 +13,7 @@ void Logger::Init()
 void Logger::Log(String text)
 {
 	Serial.print(text);
+	logHistory[0] += text;
 }
 
 void Logger::LogLine(String text)
@@ -31,6 +32,11 @@ void Logger::LogLine(String text)
 
 	if (logLine < logHistoryCount)
 		++logLine;
+}
+
+void Logger::LogLine(int text)
+{
+	LogLine(String(text));
 }
 
 String* Logger::GetLogHistory()

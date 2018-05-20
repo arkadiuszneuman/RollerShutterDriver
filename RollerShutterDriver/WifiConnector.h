@@ -15,9 +15,11 @@ class WifiConnector
 {
 private:
 	int maxConnectionSeconds = 10;
+	Logger logger;
 	void CreateSoftAP();
 public:
 	void ConnectToWifi(ConfigManager configManager);
+	void Init(Logger logger);
 };
 
 #endif

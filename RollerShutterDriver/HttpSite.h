@@ -17,6 +17,7 @@ class HttpSite
 private:
 	ESP8266WebServer* server; //Server on port 80
 	ConfigManager configManager;
+	Logger logger;
 	String status = "Idle";
 	void(*receivedLevelFunc)(int);
 	void Index();

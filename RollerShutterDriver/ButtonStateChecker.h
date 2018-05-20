@@ -9,6 +9,8 @@
 	#include "WProgram.h"
 #endif
 
+#include "Logger.h"
+
 #define NOTHING 0
 #define DOUBLE_CLICK 1
 #define CLICK 2
@@ -37,9 +39,9 @@ private:
 	bool waitForUp = false;        // when held, whether to wait for the up event
 	bool holdEventPast = false;    // whether or not the hold event happened already
 	bool longHoldEventPast = false;// whether or not the long hold event happened already
-
+	Logger logger;
 public:
-	ButtonStateChecker(int buttonPin);
+	ButtonStateChecker(int buttonPin, Logger logger);
 	int CheckButton();
 };
 

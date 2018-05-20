@@ -9,9 +9,13 @@
 	#include "WProgram.h"
 #endif
 
+#include "Logger.h"
+
 class ConfigManager {
+private:
+	Logger logger;
 public:
-	void Init();
+	void Init(Logger logger);
 	bool SaveConfig();
 	bool LoadConfig();
 

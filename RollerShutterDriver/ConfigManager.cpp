@@ -2,11 +2,13 @@
 #include <ArduinoJson.h>
 #include "FS.h"
 
-void ConfigManager::Init()
+void ConfigManager::Init(Logger logger)
 {
+	this->logger = logger;
+
 	if (!SPIFFS.begin())
 	{
-		Serial.println("Failed to mount file system");
+		logger.LogLine("Failed to mount file system");
 		return;
 	}
 }
@@ -25,7 +27,7 @@ bool ConfigManager::SaveConfig()
 	File configFile = SPIFFS.open("/config.json", "w");
 	if (!configFile) 
 	{
-		Serial.println("Failed to open config file for writing");
+		logger.LogLine("Failed to open config file for writing");
 		return false;
 	}
 	json.prettyPrintTo(Serial);
@@ -46,7 +48,7 @@ bool ConfigManager::LoadConfig()
 		configFile = SPIFFS.open("/config.json", "r");
 		if (!configFile)
 		{
-			Serial.println("Config file doesn't exist. Creating new...");
+			logger.LogLine("Config file doesn't exist. Creating new...");
 			if (SaveConfig())
 				continue;
 		}
@@ -54,14 +56,14 @@ bool ConfigManager::LoadConfig()
 
 	if (!configFile)
 	{
-		Serial.println("Failed to open config file");
+		logger.LogLine("Failed to open config file");
 		return false;
 	}
 
 	size_t size = configFile.size();
 	if (size > 1024) 
 	{
-		Serial.println("Config file size is too large");
+		logger.LogLine("Config file size is too large");
 		return false;
 	}
 
@@ -78,7 +80,7 @@ bool ConfigManager::LoadConfig()
 
 	if (!json.success())
 	{
-		Serial.println("Failed to parse config file");
+		logger.LogLine("Failed to parse config file");
 		configFile.close();
 		return false;
 	}
@@ -89,10 +91,10 @@ bool ConfigManager::LoadConfig()
 	const char* port = json["port"];
 	const char* uri = json["uri"];
 
-	Serial.println("Loaded config");
-	Serial.println(wifiname);
-	Serial.println(wifipass);
-	Serial.println(infourl);
+	logger.LogLine("Loaded config");
+	logger.LogLine(wifiname);
+	logger.LogLine(wifipass);
+	logger.LogLine(infourl);
 	
 	WifiName = wifiname;
 	WifiPass = wifipass;

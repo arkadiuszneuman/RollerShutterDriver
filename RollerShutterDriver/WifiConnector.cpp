@@ -1,6 +1,11 @@
 #include "WifiConnector.h"
 #include <ESP8266WiFi.h>
 
+void WifiConnector::Init(Logger logger)
+{
+	this->logger = logger;
+}
+
 void WifiConnector::ConnectToWifi(ConfigManager configManager)
 {
 	if (configManager.WifiName == "")
@@ -14,7 +19,7 @@ void WifiConnector::ConnectToWifi(ConfigManager configManager)
 
 	WiFi.begin(wifiname, wifipass); //Connect to your WiFi router
 
-	Serial.println("");
+	logger.LogLine("");
 
 	int connectionSeconds = 0;
 	bool isConnected = false;
@@ -24,7 +29,7 @@ void WifiConnector::ConnectToWifi(ConfigManager configManager)
 		if (WiFi.status() != WL_CONNECTED)
 		{
 			delay(1000);
-			Serial.print(".");
+			logger.Log(".");
 
 			++connectionSeconds;
 			if (connectionSeconds >= maxConnectionSeconds)
@@ -40,17 +45,17 @@ void WifiConnector::ConnectToWifi(ConfigManager configManager)
 	if (isConnected) 
 	{
 		//If connection successful show IP address in serial monitor
-		Serial.println("");
-		Serial.print("Connected to ");
-		Serial.println(configManager.WifiName);
-		Serial.print("IP address: ");
-		Serial.println(WiFi.localIP());  //IP address assigned to your ESP
+		logger.LogLine("");
+		logger.Log("Connected to ");
+		logger.LogLine(configManager.WifiName);
+		logger.Log("IP address: ");
+		logger.LogLine(WiFi.localIP().toString());  //IP address assigned to your ESP
 	}
 	else 
 	{
-		Serial.println("");
-		Serial.print("Cannot connect to ");
-		Serial.println(configManager.WifiName);
+		logger.LogLine("");
+		logger.Log("Cannot connect to ");
+		logger.LogLine(configManager.WifiName);
 
 		CreateSoftAP();
 	}
@@ -58,11 +63,11 @@ void WifiConnector::ConnectToWifi(ConfigManager configManager)
 
 void WifiConnector::CreateSoftAP()
 {
-	Serial.println("Creating soft AP");
+	logger.LogLine("Creating soft AP");
 
 	bool result = WiFi.softAP("ESP_Same_Pass_As_SSID", "ESP_Same_Pass_As_SSID");
 	if (result)
-		Serial.println("AP Ready");
+		logger.LogLine("AP Ready");
 	else
-		Serial.println("Failed!");
+		logger.LogLine("Failed!");
 }

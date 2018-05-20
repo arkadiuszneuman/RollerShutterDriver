@@ -7,10 +7,14 @@
 #include "WProgram.h"
 #endif
 
+#include "Logger.h"
+
 class OtaDriver
 {
+private:
+	Logger logger;
 public:
-	void Init();
+	void Init(Logger logger);
 	void Update();
 };
 

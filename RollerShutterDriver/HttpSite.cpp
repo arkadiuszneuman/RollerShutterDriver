@@ -2,10 +2,12 @@
 #include "index.h"
 #include "config.h"
 
-void HttpSite::Init(ConfigManager configManager, void (*receivedLevelFunc)(int))
+void HttpSite::Init(ConfigManager configManager, Logger logger,
+	void (*receivedLevelFunc)(int))
 {
 	server = new ESP8266WebServer(80);
 	this->configManager = configManager;
+	this->logger = logger;
 	this->receivedLevelFunc = receivedLevelFunc;
 
 	server->on("/", std::bind(&HttpSite::Index, this));
@@ -15,7 +17,7 @@ void HttpSite::Init(ConfigManager configManager, void (*receivedLevelFunc)(int))
 	server->on("/changelevel", std::bind(&HttpSite::ChangeLevel, this));
 
 	server->begin();
-	Serial.println("HTTP server started");
+	logger.LogLine("HTTP server started");
 }
 
 void HttpSite::Update()
@@ -30,7 +32,7 @@ void HttpSite::SetStatus(String status)
 
 void HttpSite::Index()
 {
-	Serial.println("request for /");
+	logger.LogLine("request for /");
 	String html = page_index;
 	html.replace("{status}", status);
 	server->send(200, "text/html", html);
@@ -38,7 +40,7 @@ void HttpSite::Index()
 
 void HttpSite::Config()
 {
-	Serial.println("request for /config");
+	logger.LogLine("request for /config");
 	String html = page_config;
 	html.replace("{wifiname}", configManager.WifiName);
 	html.replace("{wifipass}", configManager.WifiPass);
@@ -50,7 +52,7 @@ void HttpSite::Config()
 
 void HttpSite::ConfigPost()
 {
-	Serial.println("post to /config");
+	logger.LogLine("post to /config");
 	String wifiname = server->arg("wifiname");
 	String wifipass = server->arg("wifipassword");
 	String infourl = server->arg("infourl");
@@ -70,7 +72,7 @@ void HttpSite::ConfigPost()
 
 void HttpSite::ResetSettings()
 {
-	Serial.println("post to /resetsettings");
+	logger.LogLine("post to /resetsettings");
 
 	configManager.WifiName = "";
 	configManager.WifiPass = "";
@@ -85,7 +87,7 @@ void HttpSite::ResetSettings()
 
 void HttpSite::ChangeLevel()
 {
-	Serial.println("get from /changelevel");
+	logger.LogLine("get from /changelevel");
 
 	String stringlevel = server->arg("level");
 
@@ -107,15 +109,15 @@ void HttpSite::SendInformationAboutLevel(int level)
 
 		String levelString(level);
 		uri.replace("{level}", levelString);
-		Serial.print("sending info about level ");
-		Serial.print(url);
-		Serial.print(":");
-		Serial.print(port);
-		Serial.println(uri);
+		logger.Log("sending info about level ");
+		logger.Log(url);
+		logger.Log(":");
+		logger.Log(port);
+		logger.LogLine(uri);
 
 		WiFiClient client;
 		if (!client.connect(url, atoi(port.c_str()))) {
-			Serial.println("connection failed");
+			logger.LogLine("connection failed");
 			return;
 		}
 
@@ -126,13 +128,13 @@ void HttpSite::SendInformationAboutLevel(int level)
 		delay(10);
 
 		// Read all the lines of the reply from server and print them to Serial
-		Serial.println("Respond:");
+		logger.LogLine("Respond:");
 		while (client.available()) {
 			String line = client.readStringUntil('\r');
-			Serial.print(line);
+			logger.Log(line);
 		}
 
-		Serial.println();
-		Serial.println("closing connection");
+		logger.LogLine();
+		logger.LogLine("closing connection");
 	}
 }

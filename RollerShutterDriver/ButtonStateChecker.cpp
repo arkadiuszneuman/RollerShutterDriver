@@ -1,11 +1,8 @@
-// 
-// 
-// 
-
 #include "ButtonStateChecker.h"
 
-ButtonStateChecker::ButtonStateChecker(int buttonPin)
+ButtonStateChecker::ButtonStateChecker(int buttonPin, Logger logger)
 {
+	this->logger = logger;
 	this->buttonPin = buttonPin;
 	pinMode(buttonPin, INPUT);
 	upTime = millis();
@@ -30,12 +27,12 @@ int ButtonStateChecker::CheckButton()
 		else  DConUp = false;
 		DCwaiting = false;
 
-		Serial.println("Down");
+		logger.LogLine("Down");
 	}
 	// Button released
 	else if (buttonVal == LOW && buttonLast == HIGH && (millis() - downTime) > debounce)
 	{
-		Serial.println("Up");
+		logger.LogLine("Up");
 		if (!ignoreUp)
 		{
 			upTime = millis();

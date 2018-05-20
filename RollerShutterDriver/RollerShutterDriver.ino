@@ -1,4 +1,3 @@
-#include "Logger.h"
 #include <ArduinoJson.hpp>
 #include <ArduinoJson.h>
 
@@ -7,6 +6,7 @@
 #include "ButtonStateChecker.h"
 #include "WifiConnector.h"
 #include "HttpSite.h"
+#include "Logger.h"
 
 #define FULL_ROLLER_MOVE_TIME 43000
 #define BUTTON_DOWN_PIN 5
@@ -19,8 +19,8 @@
 #undef min
 #define min(a,b) ((a)>(b)?(b):(a))
 
-ButtonStateChecker buttonDown(BUTTON_DOWN_PIN);
-ButtonStateChecker buttonUp(BUTTON_UP_PIN);
+ButtonStateChecker* buttonDown;
+ButtonStateChecker* buttonUp;
 
 OtaDriver otaDriver;
 
@@ -43,16 +43,19 @@ void setup()
 {
 	logger.Init();
 
-	configManager.Init();
+	configManager.Init(logger);
 	configManager.LoadConfig();
 
 	wifiConnector.ConnectToWifi(configManager);
-	httpSite.Init(configManager, receive);
+	httpSite.Init(configManager, logger, receive);
 
-	otaDriver.Init();
+	otaDriver.Init(logger);
 
 	pinMode(RELAY_UP_PIN, OUTPUT);
 	pinMode(RELAY_DOWN_PIN, OUTPUT);
+
+	buttonDown = new ButtonStateChecker(BUTTON_DOWN_PIN, logger);
+	buttonUp = new ButtonStateChecker(BUTTON_UP_PIN, logger);
 
 	StopMovingRoller();
 }
@@ -64,13 +67,13 @@ void receive(int requestedLevel)
 	requestedLevel = min(requestedLevel, 100);
 	requestedLevel = max(requestedLevel, 0);
 
-	Serial.print("Changing level to ");
-	Serial.println(requestedLevel);
+	logger.Log("Changing level to ");
+	logger.LogLine(requestedLevel);
 
 	long millisToSet = requestedLevel * 0.01 * FULL_ROLLER_MOVE_TIME;
 
-	Serial.print("millisToSet ");
-	Serial.println(millisToSet);
+	logger.Log("millisToSet ");
+	logger.LogLine(millisToSet);
 
 	isMovedFromButton = false;
 	fullRollerMove = false;
@@ -82,7 +85,7 @@ void loop()
 	httpSite.Update();
 	otaDriver.Update();
 
-	int buttonUpState = buttonUp.CheckButton();
+	int buttonUpState = buttonUp->CheckButton();
 	if (buttonUpState > 0)
 	{
 		if (isRollerMoving())
@@ -100,15 +103,15 @@ void loop()
 				fullRollerMove = true;
 			}
 
-			Serial.print("fullRollerMove ");
-			Serial.println(fullRollerMove);
+			logger.Log("fullRollerMove ");
+			logger.LogLine(fullRollerMove);
 
 			isMovedFromButton = true;
 			MoveRoller(0);
 		}
 	}
 
-	int buttonDownState = buttonDown.CheckButton();
+	int buttonDownState = buttonDown->CheckButton();
 	if (buttonDownState > 0)
 	{
 		if (isRollerMoving())
@@ -126,8 +129,8 @@ void loop()
 				fullRollerMove = true;
 			}
 
-			Serial.print("fullRollerMove ");
-			Serial.println(fullRollerMove);
+			logger.Log("fullRollerMove ");
+			logger.LogLine(fullRollerMove);
 
 			isMovedFromButton = true;
 			MoveRoller(FULL_ROLLER_MOVE_TIME);
@@ -153,8 +156,8 @@ bool isTimePassed()
 
 		if (fullRollerMove)
 		{
-			Serial.print("is passed by full roller move ");
-			Serial.println(passedTime > FULL_ROLLER_MOVE_TIME);
+			logger.Log("is passed by full roller move ");
+			logger.LogLine(passedTime > FULL_ROLLER_MOVE_TIME);
 
 			return passedTime > FULL_ROLLER_MOVE_TIME;
 		}
@@ -191,11 +194,11 @@ void MoveRoller(long millisToSet)
 
 	if (rollerFinalMillis != rollerMillisFromTop || fullRollerMove)
 	{
-		Serial.print("Millis to set ");
-		Serial.println(rollerFinalMillis);
+		logger.Log("Millis to set ");
+		logger.LogLine(rollerFinalMillis);
 
-		Serial.print("Millis from top ");
-		Serial.println(rollerMillisFromTop);
+		logger.Log("Millis from top ");
+		logger.LogLine(rollerMillisFromTop);
 
 		rollerMillis = millis();
 
@@ -237,10 +240,10 @@ void StopMovingRoller()
 	digitalWrite(RELAY_UP_PIN, HIGH);
 	digitalWrite(RELAY_DOWN_PIN, HIGH);
 
-	Serial.print("passedTime ");
-	Serial.println(passedTime);
-	Serial.print("isRollerMovingUp ");
-	Serial.println(isRollerMovingUp);
+	logger.Log("passedTime ");
+	logger.LogLine(passedTime);
+	logger.Log("isRollerMovingUp ");
+	logger.LogLine(isRollerMovingUp);
 
 	if (isRollerMovingUp)
 	{
@@ -251,18 +254,18 @@ void StopMovingRoller()
 		rollerMillisFromTop += passedTime;
 	}
 
-	Serial.print("before Setting rollerMillisFromTop ");
-	Serial.println(rollerMillisFromTop);
+	logger.Log("before Setting rollerMillisFromTop ");
+	logger.LogLine(rollerMillisFromTop);
 	rollerMillisFromTop = max(min(rollerMillisFromTop, FULL_ROLLER_MOVE_TIME), 0);
-	Serial.print("Setting rollerMillisFromTop ");
-	Serial.println(rollerMillisFromTop);
+	logger.Log("Setting rollerMillisFromTop ");
+	logger.LogLine(rollerMillisFromTop);
 
 	isRollerMovingUp = false;
 	isRollerMovingDown = false;
 
 	int currentLevel = rollerMillisFromTop * 100 / FULL_ROLLER_MOVE_TIME * 1.0;
 
-	Serial.println(currentLevel);
+	logger.LogLine(currentLevel);
 
 	SendMessage(currentLevel);
 }
