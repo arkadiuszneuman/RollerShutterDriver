@@ -55,6 +55,9 @@ void setup()
 	pinMode(RELAY_UP_PIN, OUTPUT);
 	pinMode(RELAY_DOWN_PIN, OUTPUT);
 
+	pinMode(BUTTON_DOWN_PIN, INPUT);
+	pinMode(BUTTON_UP_PIN, INPUT);
+
 	buttonDown = new ButtonStateChecker(BUTTON_DOWN_PIN, logger);
 	buttonUp = new ButtonStateChecker(BUTTON_UP_PIN, logger);
 
