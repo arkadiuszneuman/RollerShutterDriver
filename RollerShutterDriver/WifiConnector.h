@@ -3,7 +3,6 @@
 #ifndef _WIFICONNECTOR_h
 #define _WIFICONNECTOR_h
 
-#include "WifiPass.h";
 #include "ConfigManager.h"
 
 #if defined(ARDUINO) && ARDUINO >= 100

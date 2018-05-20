@@ -1,3 +1,4 @@
+#include "Logger.h"
 #include <ArduinoJson.hpp>
 #include <ArduinoJson.h>
 
@@ -33,13 +34,14 @@ unsigned long rollerFinalMillis = 0;
 bool isMovedFromButton;
 bool fullRollerMove = false;
 
+Logger logger;
 ConfigManager configManager;
 WifiConnector wifiConnector;
 HttpSite httpSite;
 
 void setup()
 {
-	Serial.begin(115200);
+	logger.Init();
 
 	configManager.Init();
 	configManager.LoadConfig();
