@@ -4,24 +4,24 @@ void Logger::Init()
 {
 	Serial.begin(115200);
 
-	logHistory = new String[logHistoryCount];
+	//logHistory = new String[logHistoryCount];
 
-	for (int i = 0; i < logHistoryCount; i++)
-		logHistory[i] = "";
+	//for (int i = 0; i < logHistoryCount; i++)
+	//	logHistory[i] = "";
 
-	LogLine("Log initialized");
+	//LogLine("Log initialized");
 }
 
 void Logger::Log(String text)
 {
 	Serial.print(text);
-	logHistory[0] += text;
+	/*logHistory[0] += text;*/
 }
 
 void Logger::LogLine(String text)
 {
 	Serial.println(text);
-	logHistory[0] += text;
+	/*logHistory[0] += text;
 
 	if (logLine > 0)
 	{
@@ -34,7 +34,7 @@ void Logger::LogLine(String text)
 	logHistory[0] = "";
 
 	if (logLine < logHistoryCount)
-		++logLine;
+		++logLine;*/
 }
 
 void Logger::LogLine(int text)
@@ -46,6 +46,6 @@ void Logger::LogLine(int text)
 
 String* Logger::GetLogHistory()
 {
-	return logHistory;
+	//return logHistory;
 }
 

@@ -46,9 +46,9 @@ void OtaDriver::Init(Logger &logger)
 		else if (error == OTA_END_ERROR) this->logger.LogLine("End Failed");
 	});
 	ArduinoOTA.begin();
-	logger.LogLine("Ready");
+	logger.LogLine("OTA Ready");
 	logger.Log("IP address: ");
-	logger.LogLine(WiFi.localIP());
+	logger.LogLine(WiFi.localIP().toString());
 }
 
 void OtaDriver::Update()

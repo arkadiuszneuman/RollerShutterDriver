@@ -14,7 +14,7 @@
 class Logger
 {
 private:
-	String* logHistory;
+	//String* logHistory;
 	int logLine = 0;
 
 public:

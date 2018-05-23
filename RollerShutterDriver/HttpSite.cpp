@@ -126,14 +126,14 @@ void HttpSite::SendInformationAboutLevel(int level)
 		client.print(String("GET ") + uri + " HTTP/1.1\r\n" +
 			"Host: " + url + "\r\n" +
 			"Connection: close\r\n\r\n");
-		delay(10);
+		//delay(10);
 
-		// Read all the lines of the reply from server and print them to Serial
-		logger.LogLine("Respond:");
-		while (client.available()) {
-			String line = client.readStringUntil('\r');
-			logger.Log(line);
-		}
+		//// Read all the lines of the reply from server and print them to Serial
+		//logger.LogLine("Respond:");
+		//while (client.available()) {
+		//	String line = client.readStringUntil('\r');
+		//	logger.Log(line);
+		//}
 
 		logger.LogLine();
 		logger.LogLine("closing connection");

@@ -92,9 +92,6 @@ bool ConfigManager::LoadConfig()
 	const char* uri = json["uri"];
 
 	logger.LogLine("Loaded config");
-	logger.LogLine(wifiname);
-	logger.LogLine(wifipass);
-	logger.LogLine(infourl);
 	
 	WifiName = wifiname;
 	WifiPass = wifipass;

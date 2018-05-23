@@ -14,10 +14,10 @@
 #define RELAY_DOWN_PIN 14
 #define RELAY_UP_PIN 12
 
-#undef max
-#define max(a,b) ((a)>(b)?(a):(b))
-#undef min
-#define min(a,b) ((a)>(b)?(b):(a))
+//#undef max
+//#define max(a,b) ((a)>(b)?(a):(b))
+//#undef min
+//#define min(a,b) ((a)>(b)?(b):(a))
 
 ButtonStateChecker* buttonDown;
 ButtonStateChecker* buttonUp;
@@ -41,7 +41,20 @@ HttpSite httpSite;
 
 void setup()
 {
+	pinMode(RELAY_UP_PIN, OUTPUT);
+	pinMode(RELAY_DOWN_PIN, OUTPUT);
+
+	digitalWrite(RELAY_UP_PIN, HIGH);
+	digitalWrite(RELAY_DOWN_PIN, HIGH);
+
+	pinMode(BUTTON_DOWN_PIN, INPUT);
+	pinMode(BUTTON_UP_PIN, INPUT);
+
 	logger.Init();
+
+	buttonDown = new ButtonStateChecker(BUTTON_DOWN_PIN, logger);
+	buttonUp = new ButtonStateChecker(BUTTON_UP_PIN, logger);
+	
 
 	configManager.Init(logger);
 	configManager.LoadConfig();
@@ -51,17 +64,6 @@ void setup()
 	httpSite.Init(configManager, logger, receive);
 
 	otaDriver.Init(logger);
-
-	pinMode(RELAY_UP_PIN, OUTPUT);
-	pinMode(RELAY_DOWN_PIN, OUTPUT);
-
-	pinMode(BUTTON_DOWN_PIN, INPUT);
-	pinMode(BUTTON_UP_PIN, INPUT);
-
-	buttonDown = new ButtonStateChecker(BUTTON_DOWN_PIN, logger);
-	buttonUp = new ButtonStateChecker(BUTTON_UP_PIN, logger);
-
-	StopMovingRoller();
 }
 
 void receive(int requestedLevel)
@@ -194,7 +196,13 @@ bool isTimePassed()
 
 void MoveRoller(long millisToSet)
 {
-	rollerFinalMillis = max(min(millisToSet, FULL_ROLLER_MOVE_TIME), 0);
+	if (millisToSet < FULL_ROLLER_MOVE_TIME)
+		rollerFinalMillis = millisToSet;
+	else
+		rollerFinalMillis = FULL_ROLLER_MOVE_TIME;
+
+	if (rollerFinalMillis < 0)
+		rollerFinalMillis = 0;
 
 	if (rollerFinalMillis != rollerMillisFromTop || fullRollerMove)
 	{
@@ -260,7 +268,13 @@ void StopMovingRoller()
 
 	logger.Log("before Setting rollerMillisFromTop ");
 	logger.LogLine(rollerMillisFromTop);
-	rollerMillisFromTop = max(min(rollerMillisFromTop, FULL_ROLLER_MOVE_TIME), 0);
+
+	if (rollerMillisFromTop > FULL_ROLLER_MOVE_TIME)
+		rollerMillisFromTop = FULL_ROLLER_MOVE_TIME;
+
+	if (rollerMillisFromTop < 0)
+		rollerMillisFromTop = 0;
+
 	logger.Log("Setting rollerMillisFromTop ");
 	logger.LogLine(rollerMillisFromTop);
 
