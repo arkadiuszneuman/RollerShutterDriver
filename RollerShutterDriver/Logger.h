@@ -22,6 +22,7 @@ public:
 	void Log(String text);
 	void LogLine(String text = "");
 	void LogLine(int text);
+	void Log(int text);
 	String* GetLogHistory();
 };
 

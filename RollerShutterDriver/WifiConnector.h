@@ -14,7 +14,7 @@
 class WifiConnector
 {
 private:
-	int maxConnectionSeconds = 10;
+	int maxConnectionSeconds = 30;
 	Logger logger;
 	void CreateSoftAP();
 public:

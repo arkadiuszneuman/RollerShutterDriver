@@ -44,6 +44,13 @@ void Logger::LogLine(int text)
 	LogLine(number);
 }
 
+void Logger::Log(int text)
+{
+	char number[12];
+	sprintf(number, "%d", text);
+	Log(number);
+}
+
 String* Logger::GetLogHistory()
 {
 	//return logHistory;

@@ -9,8 +9,8 @@
 #include "Logger.h"
 
 #define FULL_ROLLER_MOVE_TIME 43000
-#define BUTTON_DOWN_PIN 5
-#define BUTTON_UP_PIN 4
+#define BUTTON_DOWN_PIN D7 //D1
+#define BUTTON_UP_PIN D1 //D2
 #define RELAY_DOWN_PIN 14
 #define RELAY_UP_PIN 12
 
@@ -33,6 +33,7 @@ unsigned long rollerFinalMillis = 0;
 
 bool isMovedFromButton;
 bool fullRollerMove = false;
+int lastLogMillis = 0;
 
 Logger logger;
 ConfigManager configManager;
@@ -92,8 +93,14 @@ void loop()
 	otaDriver.Update();
 
 	int buttonUpState = buttonUp->CheckButton();
+	int buttonDownState = buttonDown->CheckButton();
+
 	if (buttonUpState > 0)
 	{
+		buttonDown->ResetState();
+		logger.Log("buttonUpState ");
+		logger.LogLine(buttonUpState);
+
 		if (isRollerMoving())
 		{
 			StopMovingRoller();
@@ -116,10 +123,12 @@ void loop()
 			MoveRoller(0);
 		}
 	}
-
-	int buttonDownState = buttonDown->CheckButton();
-	if (buttonDownState > 0)
+	else if (buttonDownState > 0)
 	{
+		buttonUp->ResetState();
+		logger.Log("buttonDownState ");
+		logger.LogLine(buttonDownState);
+
 		if (isRollerMoving())
 		{
 			StopMovingRoller();
@@ -147,6 +156,15 @@ void loop()
 	{
 		StopMovingRoller();
 	}
+
+	if (isRollerMoving())
+	{
+		if ((millis() - lastLogMillis) > 100)
+		{
+			logger.Log(".");
+			lastLogMillis = millis();
+		}
+	}
 }
 
 bool isRollerMoving()
@@ -162,8 +180,8 @@ bool isTimePassed()
 
 		if (fullRollerMove)
 		{
-			logger.Log("is passed by full roller move ");
-			logger.LogLine(passedTime > FULL_ROLLER_MOVE_TIME);
+			/*logger.Log("is passed by full roller move ");
+			logger.LogLine(passedTime > FULL_ROLLER_MOVE_TIME);*/
 
 			return passedTime > FULL_ROLLER_MOVE_TIME;
 		}
@@ -282,10 +300,14 @@ void StopMovingRoller()
 	isRollerMovingDown = false;
 
 	int currentLevel = rollerMillisFromTop * 100 / FULL_ROLLER_MOVE_TIME * 1.0;
-
+	
+	logger.Log("Current level ");
 	logger.LogLine(currentLevel);
 
 	SendMessage(currentLevel);
+
+	logger.LogLine(" ");
+	logger.LogLine(" ");
 }
 
 unsigned long SubstractWithoutOverflow(unsigned long firstNumber, unsigned long secondNumber)

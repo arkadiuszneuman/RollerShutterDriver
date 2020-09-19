@@ -23,7 +23,7 @@ private:
 	int buttonPin;
 
 	// Button timing variables
-	int debounce = 20;          // ms debounce period to prevent flickering when pressing or releasing the button
+	int debounce = 10;          // ms debounce period to prevent flickering when pressing or releasing the button
 	int DCgap = -1;            // max ms between clicks for a double click event
 	int holdTime = 5000;        // ms hold period: how long to wait for press+hold event
 	int longHoldTime = -1;    // ms long hold period: how long to wait for press+hold event
@@ -39,10 +39,14 @@ private:
 	bool waitForUp = false;        // when held, whether to wait for the up event
 	bool holdEventPast = false;    // whether or not the hold event happened already
 	bool longHoldEventPast = false;// whether or not the long hold event happened already
+
+	bool isDownPushed = false;
+	bool isUpPushed = false;
 	Logger logger;
 public:
 	ButtonStateChecker(int buttonPin, Logger &logger);
 	int CheckButton();
+	void ResetState();
 };
 
 #endif
